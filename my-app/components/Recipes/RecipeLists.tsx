@@ -5,6 +5,7 @@ import { Recipe } from "@/types/Recipe";
 // 親からpropsでレシピのデータを受け取って、それをRecipesItemsコンポーネントに渡します。
 import RecipeItem from "./RecipeItem";
 import { useEffect, useState } from "react";
+import Loading from "../common/loading";
 
 interface RecipesListsProps {
     selectedCategory: string;
@@ -12,6 +13,7 @@ interface RecipesListsProps {
 
 export default function RecipesLists({ selectedCategory }: RecipesListsProps) {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // localStorageから選択されたカテゴリのレシピを取得
@@ -27,7 +29,12 @@ export default function RecipesLists({ selectedCategory }: RecipesListsProps) {
         } else {
             setRecipes([]);
         }
+        setLoading(false);
     }, [selectedCategory]);
+
+    if (loading) {
+        return <Loading/>;
+    }
 
     // レシピが存在しない場合の表示
     if (recipes.length === 0) {

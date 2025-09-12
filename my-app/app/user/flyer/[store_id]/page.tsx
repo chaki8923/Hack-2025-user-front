@@ -102,7 +102,8 @@ export default function UserFlyerPage() {
     if (!user?.id) return;
 
     try {
-      await fetch('http://localhost:8080/api/v1/flyer/views', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      await fetch(`${baseUrl}/api/v1/flyer/views`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

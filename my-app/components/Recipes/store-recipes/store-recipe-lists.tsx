@@ -5,6 +5,7 @@ import StoreRecipeItem from "./store-recipe-item";
 import { Recipe } from "@/types/Recipe";
 import StoreRecipesHeader from "./store-recipe-header";
 import { useState, useEffect } from "react";
+import Loading from "@/components/common/loading";
 
 export default function StoreRecipeLists() {
     const [storeRecipes, setStoreRecipes] = useState<Recipe[]>([]);
@@ -25,7 +26,7 @@ export default function StoreRecipeLists() {
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <Loading/>;
     }
 
     return (

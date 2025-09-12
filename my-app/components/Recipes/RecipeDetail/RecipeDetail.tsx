@@ -9,6 +9,7 @@ import Refrigerator from "./Refrigerator";
 import RecipeSteps from "./RecipeSteps";
 import { getSingleRecipe } from "@/features/singleRecipe/GetSingleRecipeApi";
 import type { RecipeDetail } from "@/types/RecipeDetail";
+import Loading from "@/components/common/loading";
 
 export default function RecipeDetail({id}: {id: string}) {
     const { token } = useAuth();
@@ -28,11 +29,13 @@ export default function RecipeDetail({id}: {id: string}) {
     }, [id, token]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+           <Loading/>
+        );
     }
 
     if (!recipe) {
-        return <div>レシピが見つかりませんでした。</div>;
+        return <div className="flex flex-col items-center justify-center h-screen">レシピが見つかりませんでした。</div>;
     }
 
     return (

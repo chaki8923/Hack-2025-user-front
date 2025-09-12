@@ -33,7 +33,8 @@ export async function POST(request: Request) {
       console.log("⚠️ No token provided, sending request without authentication")
     }
 
-    const response = await fetch(`http://localhost:8080/api/v1/recipes-from-image`, {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    const response = await fetch(`${baseUrl}/api/v1/recipes-from-image`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -56,17 +57,44 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ingredients: ingredients,
-      recipes: data.data?.recipes || [],
+      recipes: {
+        low_calorie_recipes: data.data?.low_calorie_recipes || [],
+        low_price_recipes: data.data?.low_price_recipes || [],
+        quick_cook_recipes: data.data?.quick_cook_recipes || [],
+        ai_recommended_recipes: data.data?.ai_recommended_recipes || []
+      },
       confidence: 0.9
     })
 
   } catch (error) {
     console.error("❌ AI Analysis Error:", error)
     
-    // Fallback response
+    // Check if it's an authentication error
+    if (error instanceof Error && error.message.includes('401')) {
+      console.log("🔑 Authentication required - providing fallback ingredients")
+      return NextResponse.json({
+        ingredients: ["にんじん", "玉ねぎ", "キャベツ", "じゃがいも", "豚肉"],
+        recipes: {
+          low_calorie_recipes: [],
+          low_price_recipes: [],
+          quick_cook_recipes: [],
+          ai_recommended_recipes: []
+        },
+        analysis: "認証が必要ですが、基本的な食材を提案します。より詳細な分析にはログインが必要です。",
+        confidence: 0.3,
+        authRequired: true
+      })
+    }
+    
+    // Fallback response for other errors
     return NextResponse.json({
       ingredients: ["にんじん", "玉ねぎ", "キャベツ"],
-      recipes: [],
+      recipes: {
+        low_calorie_recipes: [],
+        low_price_recipes: [],
+        quick_cook_recipes: [],
+        ai_recommended_recipes: []
+      },
       analysis: "画像の分析中にエラーが発生しました。基本的な食材を提案します。",
       confidence: 0.5,
       error: error instanceof Error ? error.message : "Unknown error"

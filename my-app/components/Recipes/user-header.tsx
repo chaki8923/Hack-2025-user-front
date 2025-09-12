@@ -19,7 +19,7 @@ export default function UserHeader({ onCategoryChange }: UserHeaderProps) {
   const [selectedCategory, setSelectedCategory] = useState('ai_recommended_recipes');
   return (
     <>
-      <div className="self-stretch w-[393px] px-4 py-2 bg-stone-100 inline-flex justify-between items-center">
+      <div className="self-stretch py-2 bg-stone-100 inline-flex justify-between items-center">
           <div className="w-full relative flex justify-between items-center">
               <div className="w-6 h-6 relative overflow-hidden">
                 {/* カメラに戻る */}

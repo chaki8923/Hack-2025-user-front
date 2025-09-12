@@ -146,21 +146,32 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
           })
         })
 
-        if (!response.ok) {
-          throw new Error(`AI analysis failed: ${response.status}`)
-        }
-
         const data = await response.json()
+        
+        // Handle both successful and error responses
+        if (!response.ok) {
+          console.log(`⚠️ AI analysis returned ${response.status}, but trying to use response data`)
+          // Don't throw error immediately, try to use the response data first
+        }
         console.log("🤖 AI Analysis Result:", data)
         
         const ingredients = data.ingredients || []
-        const recipes = data.recipes || []
+        const recipes = data.recipes || {}
         
         setAnalysisResult(ingredients)
         
+        // Show authentication message if needed
+        if (data.authRequired) {
+          console.log("🔑 Authentication required for detailed analysis")
+        }
+        
         // Store ingredients and recipes in localStorage
         localStorage.setItem('detectedIngredients', JSON.stringify(ingredients))
-        localStorage.setItem('aiRecommendations', JSON.stringify(recipes))
+        localStorage.setItem('extracted_ingredients', JSON.stringify(ingredients))
+        localStorage.setItem('low_calorie_recipes', JSON.stringify(recipes.low_calorie_recipes || []))
+        localStorage.setItem('low_price_recipes', JSON.stringify(recipes.low_price_recipes || []))
+        localStorage.setItem('quick_cook_recipes', JSON.stringify(recipes.quick_cook_recipes || []))
+        localStorage.setItem('ai_recommended_recipes', JSON.stringify(recipes.ai_recommended_recipes || []))
         localStorage.setItem('aiAnalysisResult', JSON.stringify(data))
         
         // Call the parent callback with image and ingredients
@@ -168,10 +179,12 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         
       } catch (error) {
         console.error("❌ AI Analysis Error:", error)
+        
         // Fallback with mock ingredients
-        const fallbackIngredients = ["にんじん", "玉ねぎ", "キャベツ", "豚肉"]
+        const fallbackIngredients = ["にんじん", "玉ねぎ", "キャベツ", "豚肉", "じゃがいも"]
         setAnalysisResult(fallbackIngredients)
         localStorage.setItem('detectedIngredients', JSON.stringify(fallbackIngredients))
+        localStorage.setItem('extracted_ingredients', JSON.stringify(fallbackIngredients))
         onImageCapture(capturedImage, fallbackIngredients)
       }
     }

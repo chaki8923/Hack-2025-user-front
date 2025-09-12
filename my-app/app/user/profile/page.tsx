@@ -126,7 +126,8 @@ export default function ProfilePage() {
     
     try {
       setFlyersLoading(true);
-      const response = await fetch(`http://localhost:8080/api/v1/flyer/nearby?city=${encodeURIComponent(userCity)}&limit=3`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await fetch(`${baseUrl}/api/v1/flyer/nearby?city=${encodeURIComponent(userCity)}&limit=3`);
       if (response.ok) {
         const result = await response.json();
         setNearbyFlyers(result.data || []);
@@ -190,7 +191,8 @@ export default function ProfilePage() {
         setIsLoading(true)
         const token = localStorage.getItem("token")
         
-        const response = await axios.get("http://localhost:8080/api/v1/users/profile", {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+        const response = await axios.get(`${baseUrl}/api/v1/users/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -231,7 +233,8 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem("token")
       
-      const response = await axios.put("http://localhost:8080/api/v1/users/profile", data, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const response = await axios.put(`${baseUrl}/api/v1/users/profile`, data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

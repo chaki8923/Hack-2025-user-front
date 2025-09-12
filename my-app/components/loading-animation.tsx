@@ -51,8 +51,9 @@ export default function LoadingAnimation({ }: LoadingAnimationProps) {
       <div className="flex flex-col items-center gap-4 px-36 py-32 w-full max-w-sm">
         {/* Loading image */}
         <div className="w-48 h-52 flex items-center justify-center mb-4">
+          {/* gifで動かす */}
           <img 
-            src="/images/loading-image-4b3fd9.png" 
+            src="/images/loading-1.gif" 
             alt="Loading" 
             className="w-full h-full object-cover" 
           />
