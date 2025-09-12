@@ -49,7 +49,7 @@ export default function RegisterPage() {
       const name = email.split("@")[0]
       
       // 既存のuser登録APIに送信
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await fetch(`${baseUrl}/api/v1/users/register`, {
         method: "POST",
         headers: {
