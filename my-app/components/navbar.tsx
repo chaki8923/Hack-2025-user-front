@@ -24,7 +24,7 @@ export default function Navbar() {
     return null
   }
 
-  if (pathname === '/auth/login') {
+  if (pathname === '/auth/login' || pathname === '/auth/register') {
     return null
   }
 
