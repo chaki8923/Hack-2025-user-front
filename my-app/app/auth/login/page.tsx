@@ -21,7 +21,7 @@ const handleLogin = async () => {
   try {
     setError("")
     
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
     const response = await fetch(`${baseUrl}/api/v1/users/login`, {
       method: "POST",
       headers: {
