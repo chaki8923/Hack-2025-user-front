@@ -208,7 +208,7 @@ export default function Home() {
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span>ログインして始める</span>
+                  <span>はじめる</span>
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </span>
               </Button>
@@ -279,7 +279,7 @@ export default function Home() {
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-amber-300 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span>店舗ログイン</span>
+                  <span>はじめる</span>
                   <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </span>
               </Button>
