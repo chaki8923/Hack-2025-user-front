@@ -1,0 +1,53 @@
+{
+  "name": "Meguru（めぐる）- 食品ロス削減アプリ",
+  "short_name": "Meguru",
+  "description": "冷蔵庫の中身を撮影するだけでAIが最適なレシピを提案。食品ロスを削減しながら節約できるアプリです。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F4F4",
+  "theme_color": "#F1B300",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ja",
+  "categories": ["food", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/images/meguru_logo.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/meguru_logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "冷蔵庫撮影",
+      "short_name": "撮影",
+      "description": "冷蔵庫の中身を撮影してレシピを検索",
+      "url": "/user",
+      "icons": [
+        {
+          "src": "/images/photo_camera.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "レシピ一覧",
+      "short_name": "レシピ",
+      "description": "AIが提案するレシピ一覧を表示",
+      "url": "/user/recipes",
+      "icons": [
+        {
+          "src": "/images/photo_recipe.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
