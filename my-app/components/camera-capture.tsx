@@ -141,6 +141,9 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         console.log("🖼️ Image data length:", capturedImage?.length || 0)
         
         const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+        // Extract base64 data from data URL
+        const base64Data = capturedImage.split(',')[1] // Remove "data:image/jpeg;base64," prefix
+        
         const response = await fetch(`${baseUrl}/api/v1/recipes-from-image`, {
           method: 'POST',
           headers: {
@@ -148,7 +151,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ 
-            imageDataUrl: capturedImage,
+            ImageBase64: base64Data,
           })
         })
         
