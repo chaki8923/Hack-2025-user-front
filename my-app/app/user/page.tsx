@@ -82,7 +82,7 @@ export default function UserHomePage() {
   // Home view - matching Figma design exactly
   return (
     <AuthGuard>
-      <main className="min-h-screen flex flex-col items-center justify-center pb-20" style={{ backgroundColor: '#F7F4F4' }}>
+      <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
         {/* Background image */}
         <div className="absolute top-24 w-64 h-16">
           <Image

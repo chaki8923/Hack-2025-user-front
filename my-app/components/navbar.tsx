@@ -19,6 +19,10 @@ export default function Navbar() {
     if (pathname === '/') {
       return true
     }
+    // Hide on user home page (camera and recipe selection screen)
+    if (pathname === '/user') {
+      return true
+    }
     // Hide on auth pages
     if (pathname === '/auth/login' || pathname === '/auth/register') {
       return true
