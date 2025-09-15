@@ -145,10 +145,10 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ 
             imageDataUrl: capturedImage,
-            token: token 
           })
         })
         
