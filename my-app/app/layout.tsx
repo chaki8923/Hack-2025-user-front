@@ -69,6 +69,7 @@ export const metadata: Metadata = {
   category: 'food',
   classification: 'Food & Sustainability',
   other: {
+    'google-site-verification': 'AWcUSw1ljElqkB5cnWzMd4jKq1Qo9OPY44DElnMWi9k',
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
