@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react"
+import Image from "next/image";
 
 function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState("")
@@ -51,7 +52,10 @@ function ResetPasswordForm() {
       setError("")
       setIsLoading(true)
       
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 開発用
+      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 本番用
+      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await fetch(`${baseUrl}/api/v1/users/reset-password`, {
         method: "POST",
         headers: {
@@ -88,9 +92,11 @@ function ResetPasswordForm() {
         <div className="max-w-sm mx-auto">
           {/* meguruロゴ */}
           <div className="text-center mb-12 mt-8">
-            <img 
+            <Image 
               src="/images/meguru_logo.png" 
               alt="meguru" 
+              width={100} // 仮の値
+              height={100} // 仮の値
               className="h-12 mx-auto"
             />
           </div>
@@ -137,9 +143,11 @@ function ResetPasswordForm() {
 
         {/* meguruロゴ */}
         <div className="text-center mb-12 mt-8">
-          <img 
+          <Image 
             src="/images/meguru_logo.png" 
             alt="meguru" 
+            width={100} // 仮の値
+            height={100} // 仮の値
             className="h-12 mx-auto"
           />
         </div>

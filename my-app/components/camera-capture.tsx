@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Camera, RotateCcw, Check, Smartphone, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
+import Image from "next/image"
 
 interface CameraCaptureProps {
   onImageCapture: (imageDataUrl: string, ingredients: string[]) => void
@@ -30,7 +31,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
     return () => {
       stopCamera()
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const startCamera = async () => {
     try {
@@ -148,11 +149,6 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
 
         const data = await response.json()
         
-        // Handle both successful and error responses
-        if (!response.ok) {
-          console.log(`⚠️ AI analysis returned ${response.status}, but trying to use response data`)
-          // Don't throw error immediately, try to use the response data first
-        }
         console.log("🤖 AI Analysis Result:", data)
         
         const ingredients = data.ingredients || []
@@ -160,9 +156,13 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         
         setAnalysisResult(ingredients)
         
-        // Show authentication message if needed
+        // Show appropriate message based on response type
         if (data.authRequired) {
           console.log("🔑 Authentication required for detailed analysis")
+        } else if (data.fallback) {
+          console.log("🔄 Using fallback data due to backend issues")
+        } else if (data.error) {
+          console.log("⚠️ Analysis completed with errors:", data.error)
         }
         
         // Store ingredients and recipes in localStorage
@@ -220,10 +220,12 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       <div className="min-h-screen relative">
         {/* Captured image display */}
         <div className="relative w-full h-full min-h-screen">
-          <img 
+          <Image 
             src={capturedImage} 
             alt="Captured refrigerator contents" 
-            className="absolute w-full h-full object-cover"
+            fill
+            className="object-cover"
+            unoptimized
           />
           <div 
             className="absolute top-24 left-14 right-14 text-white p-2 rounded-full text-center"
@@ -241,7 +243,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         
         {/* Camera controls - positioned at bottom */}
         <div 
-          className="absolute bottom-6 left-0 right-0 flex justify-center items-center"
+          className="absolute bottom-0 left-0 right-0 flex justify-center items-center"
           style={{ backgroundColor: '#F7F4F4' }}
         >
           <div className="flex items-center justify-center gap-6 py-5">
@@ -340,7 +342,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
 
       {/* Camera controls - positioned at bottom */}
       <div 
-        className="absolute bottom-6 left-0 right-0 flex justify-center items-center"
+        className="absolute bottom-0 left-0 right-0 flex justify-center items-center"
         style={{ backgroundColor: '#F7F4F4' }}
       >
         <div className="flex items-center justify-center gap-6 py-5">

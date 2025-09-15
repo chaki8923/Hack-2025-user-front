@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -98,11 +98,14 @@ export default function UserFlyerPage() {
   };
 
   // フライヤービューを記録する関数
-  const recordFlyerView = async (flyerId: string) => {
+  const recordFlyerView = useCallback(async (flyerId: string) => {
     if (!user?.id) return;
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 開発用
+      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 本番用
+      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       await fetch(`${baseUrl}/api/v1/flyer/views`, {
         method: 'POST',
         headers: {
@@ -117,7 +120,7 @@ export default function UserFlyerPage() {
     } catch (error) {
       console.warn('フライヤービューの記録に失敗しました:', error);
     }
-  };
+  }, [user?.id]);
 
 
 
@@ -150,7 +153,7 @@ export default function UserFlyerPage() {
     };
 
     fetchFlyerData();
-  }, [storeId, user?.id]);
+  }, [storeId, user?.id, recordFlyerView]);
 
   if (loading) {
     return (

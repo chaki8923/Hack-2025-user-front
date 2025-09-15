@@ -37,7 +37,7 @@ export default function StoreRecipeLists() {
                     <p className="text-gray-500">保存したレシピが見つかりませんでした。</p>
                 </div>
             ) : (
-                <div className="self-stretch p-4 flex flex-col justify-start items-start">
+                <div className="self-stretch flex flex-col justify-start items-start">
                     {Array.isArray(filteredRecipes) && filteredRecipes.map((recipe: Recipe) => (
                         <StoreRecipeItem key={recipe.recipe_id} recipe={recipe}/>
                     ))}

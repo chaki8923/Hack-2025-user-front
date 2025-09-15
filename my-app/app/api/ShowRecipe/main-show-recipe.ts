@@ -6,7 +6,9 @@ export async function getRecipeDetail(id: string) {
         return NextResponse.json({ message: "IDが必須です" }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    // 本番用
+    const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
     const response = await fetch(`${baseUrl}/api/v1/recipes/${id}`);
 
     if (!response.ok) {

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import CameraCapture from "@/components/camera-capture"
 import LoadingAnimation from "@/components/loading-animation"
 import { useRouter } from "next/navigation"
+import Image from "next/image";
 
 export default function UserHomePage() {
   const [currentView, setCurrentView] = useState<'home' | 'camera' | 'loading'>('home')
@@ -51,9 +52,7 @@ export default function UserHomePage() {
             onClick={handleBackToHome} 
             className="text-white bg-transparent hover:bg-transparent p-2"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Image src="/images/back.svg" alt="back" width={24} height={24} />
           </Button>
         </div>
 
@@ -80,9 +79,11 @@ export default function UserHomePage() {
     <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
       {/* Background image */}
       <div className="absolute top-24 w-64 h-16">
-        <img
-          src="/images/home-background-1a88b1.png"
+        <Image
+          src="/images/logo-image.png"
           alt="Background"
+          width={256} // w-64 は 256px
+          height={64} // h-16 は 64px
           className="w-full h-full object-cover"
         />
       </div>
@@ -113,7 +114,7 @@ export default function UserHomePage() {
               }}
               onClick={handleCameraClick}
             >
-              <img src="/images/photo_camera.svg" alt="Camera" className="w-24 h-24" />
+              <Image src="/images/photo_camera.svg" alt="Camera" width={96} height={96} />
             </div>
             <p 
               className="text-center"
@@ -151,7 +152,7 @@ export default function UserHomePage() {
               className="flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
               onClick={handleRecipeClick}
             >
-              <img src="/images/photo_recipe.svg" alt="Recipe" className="w-24 h-24" />
+              <Image src="/images/photo_recipe.svg" alt="Recipe" width={96} height={96} />
             </div>
             <p 
               className="text-center"

@@ -8,6 +8,7 @@ export interface Recipe {
     ingredients: string[];
     seasonings: string[];
     saved_flg: boolean;
+    created_at: string;
 }
 
 // レシピカテゴリ別のデータ構造

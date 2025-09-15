@@ -21,7 +21,7 @@ export default function RecipeImage({ image }: RecipeImageProps) {
       </Link>
       </div>
       <Image
-        className="w-full h-96 object-cover"
+        className="w-[390px] h-96 object-cover"
         src={image}
         alt="レシピ画像"
         width={1000}

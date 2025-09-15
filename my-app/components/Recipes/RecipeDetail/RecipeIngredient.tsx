@@ -21,7 +21,7 @@ export default function RecipeIngredient({ ingredients }: RecipeIngredientProps)
             <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 <div className="self-stretch flex flex-col justify-start items-start">
                     {ingredients.map((ingredient, index) => (
-                        <div key={index} className="self-stretch py-2 border-b border-zinc-800 inline-flex justify-between items-center gap-2">
+                        <div key={index} className="self-stretch py-2 border-b border-dotted border-zinc-800 inline-flex justify-between items-center gap-2">
                             <div className="text-zinc-800 text-sm font-normal font-['Noto_Sans_JP'] leading-tight">{ingredient.name}</div>
                             <div className="text-zinc-800 text-sm font-normal font-['Noto_Sans_JP'] leading-tight">{ingredient.amount_text}</div>
                         </div>

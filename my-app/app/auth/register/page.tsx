@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import Image from "next/image";
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1)
@@ -48,7 +49,9 @@ export default function RegisterPage() {
       // emailからnameを生成（@より前の部分）
       const name = email.split("@")[0]
       
-      // 既存のuser登録APIに送信
+      // 開発用
+      // const baseUrl = "http://localhost:8080";
+      // 本番用 
       const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await fetch(`${baseUrl}/api/v1/users/register`, {
         method: "POST",
@@ -172,10 +175,12 @@ export default function RegisterPage() {
       <div className="max-w-sm mx-auto">
         {/* meguruロゴ */}
         <div className="text-center mb-12 mt-8">
-          <img 
+          <Image 
             src="/images/meguru_logo.png" 
             alt="meguru" 
-            className="h-12 mx-auto"
+            className="mx-auto"
+            width={254}
+            height={70}
           />
         </div>
 
@@ -222,7 +227,7 @@ export default function RegisterPage() {
 
             <Button
               onClick={handleStep1Submit}
-              className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all"
+              className="w-full h-12 text-white font-medium rounded-full hover:opacity-90 transition-all"
               style={{ backgroundColor: '#F1B300' }}
             >
               送信する
@@ -265,7 +270,7 @@ export default function RegisterPage() {
 
             <Button
               onClick={handleStep2Submit}
-              className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all"
+              className="w-full h-12 text-white font-medium rounded-full hover:opacity-90 transition-all"
               style={{ backgroundColor: '#F1B300' }}
             >
               送信する
@@ -277,20 +282,20 @@ export default function RegisterPage() {
         {step === 3 && (
           <div className="space-y-8 text-center">
             <div className="space-y-4">
-              <h2 className="text-xl text-gray-900">
-                新規会員登録が<br />完了しました
-              </h2>
-              <p className="text-sm text-gray-600">
+            <div className="self-stretch h-20 mt-[70px] text-center justify-start text-zinc-800 text-2xl font-normal font-['Noto_Sans_JP']">
+              新規会員登録が<br/>完了しました
+            </div>
+              <p className="text-sm text-gray-600 mt-[14px] mb-[88px]">
                 ホームに戻り献立レシピを作りましょう
               </p>
             </div>
 
             <Button
               onClick={handleCompleteRegistration}
-              className="w-full h-12 text-white font-medium rounded-lg hover:opacity-90 transition-all"
+              className="w-full h-12 text-white font-medium rounded-full hover:opacity-90 transition-all"
               style={{ backgroundColor: '#F1B300' }}
             >
-              レシピを作る
+              レシピを探す
             </Button>
           </div>
         )}

@@ -47,7 +47,8 @@ export const mockRecipeData: RecipeData = {
         "すり白ごま",
         "すり白ごま"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "715d311f-fc35-4f24-a8dd-b8ec13b719ee",
@@ -78,7 +79,8 @@ export const mockRecipeData: RecipeData = {
         "(トッピング) 青のり",
         "(トッピング) 青のり"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "c5150ef7-487d-432b-ac0c-ace4df315e95",
@@ -103,7 +105,8 @@ export const mockRecipeData: RecipeData = {
         "(煮汁) 料理酒",
         "(煮汁) 砂糖"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "b5377c49-9d61-4adf-9ece-b9490f44a3be",
@@ -127,7 +130,8 @@ export const mockRecipeData: RecipeData = {
         "しょうゆ",
         "サラダ油"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     }
   ],
   low_price_recipes: [
@@ -160,7 +164,8 @@ export const mockRecipeData: RecipeData = {
         "(トッピング) 青のり",
         "(トッピング) 青のり"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "b5377c49-9d61-4adf-9ece-b9490f44a3be",
@@ -184,7 +189,8 @@ export const mockRecipeData: RecipeData = {
         "しょうゆ",
         "サラダ油"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "dbfa7ace-8532-49bc-8b92-8d0ac3d515e1",
@@ -219,7 +225,8 @@ export const mockRecipeData: RecipeData = {
         "すり白ごま",
         "すり白ごま"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "c5150ef7-487d-432b-ac0c-ace4df315e95",
@@ -244,7 +251,8 @@ export const mockRecipeData: RecipeData = {
         "(煮汁) 料理酒",
         "(煮汁) 砂糖"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     }
   ],
   quick_cook_recipes: [
@@ -281,7 +289,8 @@ export const mockRecipeData: RecipeData = {
         "すり白ごま",
         "すり白ごま"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "715d311f-fc35-4f24-a8dd-b8ec13b719ee",
@@ -312,7 +321,8 @@ export const mockRecipeData: RecipeData = {
         "(トッピング) 青のり",
         "(トッピング) 青のり"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "b5377c49-9d61-4adf-9ece-b9490f44a3be",
@@ -336,7 +346,8 @@ export const mockRecipeData: RecipeData = {
         "しょうゆ",
         "サラダ油"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "c5150ef7-487d-432b-ac0c-ace4df315e95",
@@ -361,7 +372,8 @@ export const mockRecipeData: RecipeData = {
         "(煮汁) 料理酒",
         "(煮汁) 砂糖"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     }
   ],
   ai_recommended_recipes: [
@@ -388,7 +400,8 @@ export const mockRecipeData: RecipeData = {
         "(煮汁) 料理酒",
         "(煮汁) 砂糖"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "715d311f-fc35-4f24-a8dd-b8ec13b719ee",
@@ -419,7 +432,8 @@ export const mockRecipeData: RecipeData = {
         "(トッピング) 青のり",
         "(トッピング) 青のり"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "b5377c49-9d61-4adf-9ece-b9490f44a3be",
@@ -443,7 +457,8 @@ export const mockRecipeData: RecipeData = {
         "しょうゆ",
         "サラダ油"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     },
     {
       recipe_id: "dbfa7ace-8532-49bc-8b92-8d0ac3d515e1",
@@ -478,7 +493,8 @@ export const mockRecipeData: RecipeData = {
         "すり白ごま",
         "すり白ごま"
       ],
-      saved_flg: false
+      saved_flg: false,
+      created_at: "2023-01-01T00:00:00Z"
     }
   ]
 };

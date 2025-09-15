@@ -27,6 +27,7 @@ interface Particle {
   opacity: number
   scale: number
 }
+import Image from "next/image";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -122,15 +123,14 @@ export default function Home() {
         }`}
       >
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="mb-8">
-            <img 
+        <div className="text-center mb-12">
+          <div className="mb-6">
+            <Image 
               src="/images/meguru_logo.png" 
               alt="meguru" 
-              className={`h-28 mx-auto transition-all duration-700 ease-out ${
-                isLoaded ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-              }`}
-              style={{ filter: 'drop-shadow(0 8px 16px rgba(86, 49, 36, 0.1))' }}
+              width={254}
+              height={70}
+              className="h-24 mx-auto"
             />
           </div>
           <p 

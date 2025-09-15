@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect } from "react"
 
 interface LoadingAnimationProps {
@@ -43,7 +44,7 @@ export default function LoadingAnimation({ }: LoadingAnimationProps) {
       clearInterval(timer)
       clearInterval(stepTimer)
     }
-  }, [])
+  }, [steps.length])
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
@@ -52,10 +53,12 @@ export default function LoadingAnimation({ }: LoadingAnimationProps) {
         {/* Loading image */}
         <div className="w-48 h-52 flex items-center justify-center mb-4">
           {/* gifで動かす */}
-          <img 
+          <Image 
             src="/images/loading-1.gif" 
             alt="Loading" 
             className="w-full h-full object-cover" 
+            width={192} // Added width
+            height={208} // Added height
           />
         </div>
         

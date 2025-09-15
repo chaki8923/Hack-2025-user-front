@@ -1,7 +1,10 @@
 import { RecipeData } from "@/types/Recipe";
 
 export const getRecipes = async (): Promise<RecipeData> => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:3000";
+  // 開発用
+  // const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:3000";
+  // 本番用
+  const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
   try {
     const response = await fetch(`${baseUrl}/api/Recipe`);
     

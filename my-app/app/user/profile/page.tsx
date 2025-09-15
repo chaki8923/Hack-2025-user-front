@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import AuthGuard from "@/components/AuthGuard"
 import { useAuth } from "@/hooks/useAuth"
-import { User, LogOut, MapPin, Loader2, CheckCircle, AlertCircle, Search, Store } from "lucide-react"
+import { User, LogOut, MapPin, Loader2, CheckCircle, AlertCircle, Search, Store, Info } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import Image from "next/image";
+import Loading from "@/components/common/loading"
 
 const editProfileSchema = z.object({
   name: z.string().min(1, "名前は必須です"),
@@ -126,7 +128,10 @@ export default function ProfilePage() {
     
     try {
       setFlyersLoading(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 開発用
+      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 本番用
+      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await fetch(`${baseUrl}/api/v1/flyer/nearby?city=${encodeURIComponent(userCity)}&limit=3`);
       if (response.ok) {
         const result = await response.json();
@@ -191,7 +196,10 @@ export default function ProfilePage() {
         setIsLoading(true)
         const token = localStorage.getItem("token")
         
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+        // 開発用
+        // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+        // 本番用
+        const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
         const response = await axios.get(`${baseUrl}/api/v1/users/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -233,7 +241,10 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem("token")
       
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 開発用
+      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      // 本番用
+      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await axios.put(`${baseUrl}/api/v1/users/profile`, data, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -259,7 +270,8 @@ export default function ProfilePage() {
       <AuthGuard>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#F1B300' }} />
+            {/* <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#F1B300' }} /> */}
+            <Loading />
             <p className="text-gray-600">プロファイル情報を読み込み中...</p>
           </div>
         </div>
@@ -269,10 +281,10 @@ export default function ProfilePage() {
 
   return (
     <AuthGuard>
-      <main className="container mx-auto px-4 pb-24 pt-6">
-        <div className="w-[393px] mx-auto space-y-8">
+      <main className="w-[390px] mx-auto">
+        <div className="w-[390px] mx-auto">
           {/* ヘッダー */}
-          <div className="rounded-2xl p-6 text-white" style={{ background: 'linear-gradient(135deg, #563124, #F1B300)' }}>
+          <div className="rounded-2xl p-6 text-white bg-[#F1B300]">
             <div className="flex items-center space-x-3">
               <div className="bg-white rounded-full p-3">
                 <User className="w-6 h-6" style={{ color: '#563124' }} />
@@ -480,7 +492,7 @@ export default function ProfilePage() {
                     disabled={isSubmitting}
                     className="w-full text-white font-semibold h-12 rounded-xl transition-all hover:opacity-90"
                     style={{ 
-                      background: 'linear-gradient(135deg, #563124, #F1B300)',
+                      background: '#F1B300',
                       border: 'none'
                     }}
                   >
@@ -550,9 +562,12 @@ export default function ProfilePage() {
                               )}
                             </div>
                             <div className="aspect-[3/4] mb-3 overflow-hidden rounded-lg bg-gray-100">
-                              <img
+                              <Image
                                 src={`data:image/png;base64,${flyer.image_data}`}
                                 alt={`${flyer.flyer_data?.store.name}のチラシ`}
+                                width={500} // 仮の値
+                                height={707} // 仮の値
+                                unoptimized={true} // data URL なので最適化を無効にする
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             </div>
@@ -587,11 +602,12 @@ export default function ProfilePage() {
             <CardContent className="p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="rounded-full p-2" style={{ backgroundColor: '#F1B300' }}>
-                  <span className="text-white text-sm">💡</span>
+                  {/* ヒントカードのアイコン(lucide-reactのヒントカードアイコン) */}
+                  <span className="text-white text-sm"><Info className="w-5 h-5" /></span>
                 </div>
                 <h3 className="font-semibold" style={{ color: '#563124' }}>お役立ち情報</h3>
               </div>
-              <div className="space-y-3 text-sm text-gray-600">
+              <div className="mb-6 text-sm text-gray-600">
                 <p>• 郵便番号（7桁）を入力すると住所が自動で入力されます</p>
                 <p>• 住所を登録すると、近隣店舗のお得な情報やタイムセールが表示されます</p>
                 <p>• プロファイル情報は安全に暗号化されて保存されます</p>

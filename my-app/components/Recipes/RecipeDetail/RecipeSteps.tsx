@@ -25,7 +25,7 @@ export default function RecipeSteps({ steps, cookingPoint }: RecipeStepsProps) {
                     ))}
                 </div>
             </div>
-            <div className="self-stretch flex flex-col justify-start items-start gap-4">
+            <div className="self-stretch flex flex-col justify-start items-start gap-4 mb-[28px]">
                 <div className="text-zinc-800 text-xl font-bold font-['Noto_Sans_JP'] leading-tight">作る時のポイント</div>
                 <div className="self-stretch flex flex-col justify-start items-start gap-3">
                     <div className="self-stretch inline-flex justify-start items-start gap-2">

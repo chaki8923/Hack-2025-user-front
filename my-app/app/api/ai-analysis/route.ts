@@ -33,7 +33,12 @@ export async function POST(request: Request) {
       console.log("⚠️ No token provided, sending request without authentication")
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    // 開発用
+    // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    // 本番用
+    const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+    console.log("🌐 Backend URL:", baseUrl)
+    
     const response = await fetch(`${baseUrl}/api/v1/recipes-from-image`, {
       method: 'POST',
       headers,
@@ -42,10 +47,43 @@ export async function POST(request: Request) {
       })
     })
 
+    console.log("📡 Backend response status:", response.status)
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`Backend API error ${response.status}:`, errorText)
-      throw new Error(`Backend API error: ${response.status} - ${errorText}`)
+      
+      // Handle specific error cases
+      if (response.status === 401) {
+        console.log("🔑 Authentication required - providing fallback ingredients")
+        return NextResponse.json({
+          ingredients: ["にんじん", "玉ねぎ", "キャベツ", "じゃがいも", "豚肉"],
+          recipes: {
+            low_calorie_recipes: [],
+            low_price_recipes: [],
+            quick_cook_recipes: [],
+            ai_recommended_recipes: []
+          },
+          analysis: "認証が必要ですが、基本的な食材を提案します。より詳細な分析にはログインが必要です。",
+          confidence: 0.3,
+          authRequired: true
+        })
+      }
+      
+      // For connection errors or other backend issues, return success with fallback data
+      console.log("🔄 Backend unavailable, using fallback ingredients")
+      return NextResponse.json({
+        ingredients: ["にんじん", "玉ねぎ", "キャベツ", "じゃがいも", "豚肉", "卵", "牛乳"],
+        recipes: {
+          low_calorie_recipes: [],
+          low_price_recipes: [],
+          quick_cook_recipes: [],
+          ai_recommended_recipes: []
+        },
+        analysis: "バックエンドサーバーに接続できませんでした。基本的な食材を提案します。",
+        confidence: 0.4,
+        fallback: true
+      })
     }
 
     const data = await response.json()
@@ -69,26 +107,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("❌ AI Analysis Error:", error)
     
-    // Check if it's an authentication error
-    if (error instanceof Error && error.message.includes('401')) {
-      console.log("🔑 Authentication required - providing fallback ingredients")
-      return NextResponse.json({
-        ingredients: ["にんじん", "玉ねぎ", "キャベツ", "じゃがいも", "豚肉"],
-        recipes: {
-          low_calorie_recipes: [],
-          low_price_recipes: [],
-          quick_cook_recipes: [],
-          ai_recommended_recipes: []
-        },
-        analysis: "認証が必要ですが、基本的な食材を提案します。より詳細な分析にはログインが必要です。",
-        confidence: 0.3,
-        authRequired: true
-      })
-    }
-    
-    // Fallback response for other errors
+    // Always return success with fallback data instead of 500 error
+    console.log("🔄 Using fallback ingredients due to error")
     return NextResponse.json({
-      ingredients: ["にんじん", "玉ねぎ", "キャベツ"],
+      ingredients: ["にんじん", "玉ねぎ", "キャベツ", "じゃがいも", "豚肉", "卵", "牛乳"],
       recipes: {
         low_calorie_recipes: [],
         low_price_recipes: [],
@@ -96,8 +118,9 @@ export async function POST(request: Request) {
         ai_recommended_recipes: []
       },
       analysis: "画像の分析中にエラーが発生しました。基本的な食材を提案します。",
-      confidence: 0.5,
-      error: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 })
+      confidence: 0.4,
+      error: error instanceof Error ? error.message : "Unknown error",
+      fallback: true
+    })
   }
 } 

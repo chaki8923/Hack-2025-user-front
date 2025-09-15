@@ -1,4 +1,4 @@
-import { Bookmark } from "lucide-react";
+// import { Bookmark } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface BookMarkToggleProps {
@@ -15,8 +15,11 @@ export default function BookMarkToggle({ recipe_id, saved_flg }: BookMarkToggleP
             // ログインしていない時
             return;
         }
-
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+        // 開発用
+        // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+        // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+        // 本番用
+        const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
         const method = isBookMarked ? "DELETE" : "POST";
         const endpoint = isBookMarked ? `${baseUrl}/api/v1/saved-recipes/${recipe_id}` : `${baseUrl}/api/v1/saved-recipes`;
 
@@ -39,7 +42,20 @@ export default function BookMarkToggle({ recipe_id, saved_flg }: BookMarkToggleP
     return (
         <div>
             <button onClick={handleBookmarkToggle}>
-                <Bookmark className={`w-10 h-10 ${isBookMarked ? "fill-yellow-500 text-yellow-500" : "stroke-black fill-transparent"}`} />
+                <svg 
+                    width="30" 
+                    height="30" 
+                    viewBox="0 0 15 22" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path 
+                        d="M1 20.5V1H14V20.5L7.5 16.1065L1 20.5Z" 
+                        stroke={isBookMarked ? "#EAB308" : "#000000"} 
+                        fill={isBookMarked ? "#EAB308" : "transparent"}
+                        strokeWidth="1.39286"
+                    />
+                </svg>
             </button>
         </div>
     )

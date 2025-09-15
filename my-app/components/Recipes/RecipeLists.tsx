@@ -46,7 +46,7 @@ export default function RecipesLists({ selectedCategory }: RecipesListsProps) {
     }
     
     return(
-        <div className="self-stretch p-4 flex flex-col justify-start items-start">
+        <div className="self-stretch flex flex-col justify-start items-start">
             {recipes.map((recipe, index) => (
                 <RecipeItem key={recipe.recipe_id || index} recipe={recipe} />
             ))}
