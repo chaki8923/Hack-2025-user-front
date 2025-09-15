@@ -5,7 +5,6 @@ import { Camera, RotateCcw, Check, Smartphone, Image as ImageIcon } from "lucide
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
 import Image from "next/image"
-import { log } from "console"
 
 interface CameraCaptureProps {
   onImageCapture: (imageDataUrl: string, ingredients: string[]) => void
