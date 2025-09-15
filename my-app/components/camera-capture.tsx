@@ -141,7 +141,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         console.log("🖼️ Image data length:", capturedImage?.length || 0)
         
         const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-        const response = await fetch(`${baseUrl}/api/ai-analysis`, {
+        const response = await fetch(`${baseUrl}/api/v1/recipes-from-image`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
