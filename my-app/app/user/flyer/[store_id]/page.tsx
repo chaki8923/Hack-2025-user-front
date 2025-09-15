@@ -61,6 +61,17 @@ export default function UserFlyerPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // 環境に応じたAPIベースURLを取得する関数
+  const getApiBaseUrl = () => {
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    if (isDevelopment) {
+      return 'http://localhost:8080'
+    } else {
+      return 'https://3qtmceciqv.ap-northeast-1.awsapprunner.com'
+    }
+  }
+
   // 期限状況を判定するヘルパー関数
   const getExpiryStatus = (expiryDate?: string) => {
     if (!expiryDate) return null;
@@ -102,10 +113,7 @@ export default function UserFlyerPage() {
     if (!user?.id) return;
 
     try {
-      // 開発用
-      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-      // 本番用
-      const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+      const baseUrl = getApiBaseUrl();
       await fetch(`${baseUrl}/api/v1/flyer/views`, {
         method: 'POST',
         headers: {
@@ -129,12 +137,13 @@ export default function UserFlyerPage() {
 
     const fetchFlyerData = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/flyer/all/${storeId}`);
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/v1/flyer/all/${storeId}`);
         if (!response.ok) {
           throw new Error('データの取得に失敗しました。');
         }
         const result = await response.json();
-        
+        console.log("result", result.data);
         // データが配列として返される
         const flyerData = Array.isArray(result.data) ? result.data : [];
         setFlyerDataList(flyerData);
