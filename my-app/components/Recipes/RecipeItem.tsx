@@ -56,12 +56,15 @@ export default function RecipeItem({ recipe }: RecipeItemProps) {
                 </div>
                 <div className="self-stretch flex flex-col justify-start items-start">
                   <div className="self-stretch justify-start text-slate-500 text-sm font-normal font-['Noto_Sans_JP'] leading-tight">
-                    {recipe.ingredients.map((ingredient, index) => (
-                      <span key={index}> {/* Changed key to index */} 
-                        {ingredient ? ` ${ingredient}` : ""}
-                        {index < recipe.ingredients.length - 1 ? "、" : ""}
-                      </span>
-                    ))}
+                    {recipe.ingredients && Array.isArray(recipe.ingredients) 
+                      ? recipe.ingredients.map((ingredient, index) => (
+                          <span key={index}> 
+                            {ingredient ? ` ${ingredient}` : ""}
+                            {index < recipe.ingredients.length - 1 ? "、" : ""}
+                          </span>
+                        ))
+                      : <span>食材情報なし</span>
+                    }
                   </div>
                 </div>
               </div>
