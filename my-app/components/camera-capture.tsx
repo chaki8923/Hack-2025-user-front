@@ -136,7 +136,12 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       try {
         // Call AI analysis API
         console.log("🔍 Starting AI analysis...")
-        const response = await fetch('/api/ai-analysis', {
+        console.log("📍 Sending request to:", '/api/ai-analysis')
+        console.log("🔑 Token being sent:", token ? `${token.substring(0, 20)}...` : "No token")
+        console.log("🖼️ Image data length:", capturedImage?.length || 0)
+        
+        const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+        const response = await fetch(`${baseUrl}/api/ai-analysis`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -146,6 +151,9 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
             token: token 
           })
         })
+        
+        console.log("📡 Response received:", response.status, response.statusText)
+        console.log("📋 Response headers:", Object.fromEntries(response.headers.entries()))
 
         const data = await response.json()
         
