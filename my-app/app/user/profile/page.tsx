@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import AuthGuard from "@/components/AuthGuard"
 import { useAuth } from "@/hooks/useAuth"
-import { User, LogOut, MapPin, Loader2, CheckCircle, AlertCircle, Search, Store, Info } from "lucide-react"
+import { User, LogOut, MapPin, Loader2, CheckCircle, AlertCircle, Search, Store, Info, Clock, Calendar, Eye } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -241,8 +241,6 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem("token")
       
-      // 開発用
-      // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
       // 本番用
       const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
       const response = await axios.put(`${baseUrl}/api/v1/users/profile`, data, {
@@ -281,8 +279,8 @@ export default function ProfilePage() {
 
   return (
     <AuthGuard>
-      <main className="w-[390px] mx-auto">
-        <div className="w-[390px] mx-auto">
+      <main className="min-h-screen pb-20" style={{ backgroundColor: '#F7F4F4' }}>
+        <div className="max-w-md mx-auto px-4 py-6">
           {/* ヘッダー */}
           <div className="rounded-2xl p-6 text-white bg-[#F1B300]">
             <div className="flex items-center space-x-3">
@@ -540,47 +538,87 @@ export default function ProfilePage() {
                     <span className="ml-2 text-gray-600">近隣のお得な情報を取得中...</span>
                   </div>
                 ) : nearbyFlyers.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-4">
                     {nearbyFlyers.slice(0, 3).map((flyer) => {
                       const expiryStatus = getExpiryStatus(flyer.display_expiry_date || undefined);
                       return (
-                        <Card key={flyer.id} className="group hover:shadow-md transition-shadow duration-300 border border-gray-200">
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between mb-3 gap-2">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-sm mb-1 truncate" style={{ color: '#563124' }}>
-                                  {flyer.flyer_data?.store.name}
-                                </h4>
-                                <p className="text-xs text-gray-600 line-clamp-2 leading-tight">
-                                  {flyer.flyer_data?.campaign.name}
-                                </p>
+                        <Card key={flyer.id} className="group hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden">
+                          <CardContent className="p-0">
+                            <div className="flex flex-col">
+                              {/* 店舗ヘッダー情報 */}
+                              <div className="p-4 border-b border-gray-100">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-lg mb-1 truncate" style={{ color: '#563124' }}>
+                                      {flyer.flyer_data?.store.name}
+                                    </h4>
+                                    <p className="text-sm text-gray-600 line-clamp-2">
+                                      {flyer.flyer_data?.campaign.name || 'お得なキャンペーン実施中！'}
+                                    </p>
+                                  </div>
+                                  {expiryStatus && (
+                                    <Badge className={`text-xs px-2 py-1 ${expiryStatus.color} ml-2 flex-shrink-0`}>
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      {expiryStatus.text}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
-                              {expiryStatus && (
-                                <Badge className={`text-xs px-1.5 py-0.5 ${expiryStatus.color} flex-shrink-0`}>
-                                  {expiryStatus.text}
-                                </Badge>
-                              )}
+
+                              <div className="flex flex-col sm:flex-row">
+                                {/* チラシ画像 */}
+                                <div className="w-full sm:w-40 sm:flex-shrink-0">
+                                  <div className="aspect-[4/3] sm:aspect-square sm:h-40 overflow-hidden bg-gray-100">
+                                    <Image
+                                      src={`data:image/png;base64,${flyer.image_data}`}
+                                      alt={`${flyer.flyer_data?.store.name}のチラシ`}
+                                      width={160}
+                                      height={160}
+                                      unoptimized={true}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                {/* 店舗詳細情報 */}
+                                <div className="flex-1 p-4">
+                                  <div className="space-y-3">
+                                    {/* 住所情報 */}
+                                    <div className="flex items-start text-gray-600 text-sm">
+                                      <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" style={{ color: '#F1B300' }} />
+                                      <span className="line-clamp-2 break-words">
+                                        {flyer.flyer_data?.store.prefecture} {flyer.flyer_data?.store.city} {flyer.flyer_data?.store.street}
+                                      </span>
+                                    </div>
+                                    
+                                    {/* キャンペーン期間 */}
+                                    {flyer.flyer_data?.campaign.start_date && (
+                                      <div className="flex items-center text-gray-600 text-sm">
+                                        <Calendar className="w-4 h-4 mr-2 flex-shrink-0" style={{ color: '#F1B300' }} />
+                                        <span className="truncate">
+                                          {flyer.flyer_data.campaign.start_date} 〜 {flyer.flyer_data.campaign.end_date}
+                                        </span>
+                                      </div>
+                                    )}
+                                    
+                                    {/* アクションボタン */}
+                                    <div className="pt-2">
+                                      <Button 
+                                        asChild 
+                                        size="sm"
+                                        className="w-full text-white font-medium rounded-xl transition-all hover:opacity-90"
+                                        style={{ backgroundColor: '#F1B300' }}
+                                      >
+                                        <Link href={`/user/flyer/${flyer.store_id}`} className="flex items-center justify-center gap-1 text-sm">
+                                          <Eye className="w-4 h-4" />
+                                          詳細を見る
+                                        </Link>
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div className="aspect-[3/4] mb-3 overflow-hidden rounded-lg bg-gray-100">
-                              <Image
-                                src={`data:image/png;base64,${flyer.image_data}`}
-                                alt={`${flyer.flyer_data?.store.name}のチラシ`}
-                                width={500} // 仮の値
-                                height={707} // 仮の値
-                                unoptimized={true} // data URL なので最適化を無効にする
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            </div>
-                            <Button 
-                              asChild 
-                              size="sm" 
-                              className="w-full text-white font-medium rounded-xl transition-all hover:opacity-90"
-                              style={{ backgroundColor: '#F1B300' }}
-                            >
-                              <Link href={`/user/flyer/${flyer.store_id}`}>
-                                詳細を見る
-                              </Link>
-                            </Button>
                           </CardContent>
                         </Card>
                       );

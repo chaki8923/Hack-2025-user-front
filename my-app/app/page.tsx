@@ -98,7 +98,7 @@ export default function Home() {
     setParticles(prev => [...prev, ...newParticles])
   }
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: '#F7F4F4' }}>
+    <div className="min-h-screen flex items-center justify-center p-6" >
       {/* Particle overlay */}
       <div className="fixed inset-0 pointer-events-none z-50">
         {particles.map((particle) => (
@@ -124,15 +124,15 @@ export default function Home() {
       >
         {/* Header Section */}
         <div className="text-center mb-12">
-          <div className="mb-6">
-            <Image 
-              src="/images/meguru_logo.png" 
-              alt="meguru" 
-              width={254}
-              height={70}
-              className="h-24 mx-auto"
-            />
-          </div>
+        <div className="text-center mb-12 mt-8">
+          <Image 
+            src="/images/meguru_logo.png" 
+            alt="meguru" 
+            className="mx-auto"
+            width={254}
+            height={70}
+          />
+        </div>
           <p 
             className={`text-2xl mb-12 font-medium leading-relaxed transition-all duration-700 delay-200 ease-out ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
