@@ -2,37 +2,35 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import Image from "next/image";
+import Image from "next/image"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function Navbar() {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`)
   }
 
-  // Hide navbar on home, camera, and loading pages
+  // Hide navbar on home and unauthorized access
   const shouldHideNavbar = () => {
     // Check if we're on the main homepage
     if (pathname === '/') {
       return true
     }
-    // Check if we're on the user home page (which handles camera and loading states)
-    if (pathname === '/user') {
+    // Hide on auth pages
+    if (pathname === '/auth/login' || pathname === '/auth/register') {
+      return true
+    }
+    // Hide navbar if user is not authenticated
+    if (!user) {
       return true
     }
     return false
   }
 
   if (shouldHideNavbar()) {
-    return null
-  }
-
-  if (pathname === '/auth/login' || pathname === '/auth/register') {
-    return null
-  }
-
-  if (pathname === '/auth/register') {
     return null
   }
 
