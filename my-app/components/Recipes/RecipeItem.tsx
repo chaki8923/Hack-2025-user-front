@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 // import { Bookmark } from "lucide-react";
+import { useState, useEffect } from "react";
 
 import { Recipe } from "@/types/Recipe";
 
@@ -8,7 +9,57 @@ interface RecipeItemProps {
   recipe: Recipe;
 }
 
+// localStorage操作用のヘルパー関数（BookMarkToggle.tsxと同じ）
+const getSavedRecipes = (): Record<string, { saved_flg: boolean }> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const saved = localStorage.getItem('saved_recipes');
+    return saved ? JSON.parse(saved) : {};
+  } catch (error) {
+    console.error('Error reading saved recipes from localStorage:', error);
+    return {};
+  }
+};
+
 export default function RecipeItem({ recipe }: RecipeItemProps) {
+  const [isBookmarked, setIsBookmarked] = useState(recipe.saved_flg || false);
+
+  // localStorage からブックマーク状態を読み込む
+  useEffect(() => {
+    const savedRecipes = getSavedRecipes();
+    const savedRecipe = savedRecipes[recipe.recipe_id];
+    if (savedRecipe !== undefined) {
+      setIsBookmarked(savedRecipe.saved_flg);
+    }
+  }, [recipe.recipe_id]);
+
+  // localStorage の変更を監視（他のコンポーネントでブックマーク状態が変更された場合に反映）
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'saved_recipes') {
+        const savedRecipes = getSavedRecipes();
+        const savedRecipe = savedRecipes[recipe.recipe_id];
+        if (savedRecipe !== undefined) {
+          setIsBookmarked(savedRecipe.saved_flg);
+        }
+      }
+    };
+
+    // カスタムイベントを監視（同じタブ内でのブックマーク状態変更に対応）
+    const handleBookmarkChange = (e: CustomEvent<{ recipe_id: string; saved_flg: boolean }>) => {
+      if (e.detail.recipe_id === recipe.recipe_id) {
+        setIsBookmarked(e.detail.saved_flg);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('bookmarkChanged', handleBookmarkChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('bookmarkChanged', handleBookmarkChange as EventListener);
+    };
+  }, [recipe.recipe_id]);
   return (
     <>
       <Link href={`/user/recipes/${recipe.recipe_id}`}>
@@ -35,8 +86,8 @@ export default function RecipeItem({ recipe }: RecipeItemProps) {
                 >
                   <path 
                     d="M1 20.5V1H14V20.5L7.5 16.1065L1 20.5Z" 
-                    stroke={recipe.saved_flg ? "#EAB308" : "#FFFFFF"} 
-                    fill={recipe.saved_flg ? "#EAB308" : "transparent"}
+                    stroke={isBookmarked ? "#EAB308" : "#FFFFFF"} 
+                    fill={isBookmarked ? "#EAB308" : "transparent"}
                     strokeWidth="1.39286"
                   />
                 </svg>

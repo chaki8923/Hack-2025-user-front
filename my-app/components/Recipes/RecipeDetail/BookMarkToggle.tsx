@@ -1,18 +1,63 @@
 // import { Bookmark } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 interface BookMarkToggleProps {
     recipe_id: string;
     saved_flg: boolean;
 }
 
+// localStorage操作用のヘルパー関数
+const getSavedRecipes = (): Record<string, { saved_flg: boolean }> => {
+    if (typeof window === 'undefined') return {};
+    try {
+        const saved = localStorage.getItem('saved_recipes');
+        return saved ? JSON.parse(saved) : {};
+    } catch (error) {
+        console.error('Error reading saved recipes from localStorage:', error);
+        return {};
+    }
+};
+
+const setSavedRecipes = (recipes: Record<string, { saved_flg: boolean }>) => {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem('saved_recipes', JSON.stringify(recipes));
+    } catch (error) {
+        console.error('Error saving recipes to localStorage:', error);
+    }
+};
+
+const updateRecipeBookmark = (recipe_id: string, saved_flg: boolean) => {
+    const savedRecipes = getSavedRecipes();
+    savedRecipes[recipe_id] = { saved_flg };
+    setSavedRecipes(savedRecipes);
+    
+    // カスタムイベントを発火してブックマーク状態変更を通知
+    window.dispatchEvent(new CustomEvent('bookmarkChanged', {
+        detail: { recipe_id, saved_flg }
+    }));
+};
+
 export default function BookMarkToggle({ recipe_id, saved_flg }: BookMarkToggleProps) {
     const [isBookMarked, setIsBookMarked] = useState(saved_flg);
 
+    // localStorage から初期状態を読み込む
+    useEffect(() => {
+        const savedRecipes = getSavedRecipes();
+        const savedRecipe = savedRecipes[recipe_id];
+        if (savedRecipe !== undefined) {
+            setIsBookMarked(savedRecipe.saved_flg);
+        }
+    }, [recipe_id]);
+
     const handleBookmarkToggle = useCallback(async() => {
         const token = localStorage.getItem("token");
+        
+        // ログインしていない場合はlocalStorageのみ更新
         if (!token) {
-            // ログインしていない時
+            const newBookmarkStatus = !isBookMarked;
+            setIsBookMarked(newBookmarkStatus);
+            updateRecipeBookmark(recipe_id, newBookmarkStatus);
             return;
         }
         // 開発用
@@ -33,7 +78,10 @@ export default function BookMarkToggle({ recipe_id, saved_flg }: BookMarkToggleP
         });
 
         if (response.ok) {
-            setIsBookMarked(!isBookMarked);
+            const newBookmarkStatus = !isBookMarked;
+            setIsBookMarked(newBookmarkStatus);
+            // localStorage に保存
+            updateRecipeBookmark(recipe_id, newBookmarkStatus);
         } else {
             console.error("Failed to toggle bookmark status");
         }
