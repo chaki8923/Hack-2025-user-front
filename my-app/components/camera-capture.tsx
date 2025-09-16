@@ -164,9 +164,35 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         console.log("📡 Response received:", response.status, response.statusText)
         console.log("📋 Response headers:", Object.fromEntries(response.headers.entries()))
 
-        const data = await response.json()
+        // レスポンスステータスをチェック
+        if (!response.ok) {
+          console.error("❌ API Error:", response.status, response.statusText)
+          
+          if (response.status === 401) {
+            console.error("🔑 Unauthorized: Token may be missing or invalid")
+            throw new Error(`API Error: 401 Unauthorized - Please login to access AI recipe analysis`)
+          }
+          
+          // その他のエラーの場合もフォールバックレシピを使用
+          throw new Error(`API Error: ${response.status} ${response.statusText}`)
+        }
+
+        let data;
+        try {
+          data = await response.json()
+        } catch (jsonError) {
+          console.error("❌ Error parsing response JSON:", jsonError)
+          throw new Error("Invalid JSON response from API")
+        }
         
         console.log("🤖 AI Analysis Result:", data)
+        
+        // データ構造の安全チェック
+        if (!data || !data.data) {
+          console.error("❌ Invalid response structure:", data)
+          throw new Error("Invalid response structure from API")
+        }
+        
         console.log("🤖 AI Analysis Result2:", data.data.ai_recommended_recipes)
         
         const ingredients = data.ingredients || []
@@ -285,6 +311,16 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         
       } catch (error) {
         console.error("❌ AI Analysis Error:", error)
+        
+        // 詳細なエラーログ
+        if (error instanceof Error) {
+          console.error("🔍 Error details:", error.message)
+          
+          // 401エラーの場合の特別な処理
+          if (error.message.includes("401")) {
+            console.error("🔑 Unauthorized Error: Please login to access AI recipe analysis")
+          }
+        }
         
         // Fallback with mock ingredients and recipes
         const fallbackIngredients = ["にんじん", "玉ねぎ", "キャベツ", "豚肉", "じゃがいも"]
