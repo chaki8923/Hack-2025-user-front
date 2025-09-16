@@ -81,120 +81,119 @@ export default function UserHomePage() {
 
   // Home view - matching Figma design exactly
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
-      {/* Main content container - including logo */}
-      <div className="flex flex-col items-center gap-14 px-8 py-8 w-full max-w-sm">
-        {/* Logo image */}
-        <div className="flex justify-center">
-          <Image
-            src="/images/logo-image.png"
-            alt="Background"
-            width={256}
-            height={64}
-            className="object-contain"
-          />
-        </div>
-        {/* First section - Camera */}
-        <div className="flex flex-col items-center gap-3 w-44">
-          <p 
-            className="text-center leading-5"
-            style={{ 
-              color: '#563124', 
-              fontFamily: 'Noto Sans JP', 
-              fontSize: '16px', 
-              fontWeight: '700', 
-              lineHeight: '21px' 
-            }}
-          >
-            冷蔵庫の中身を撮影して<br />レシピを検索しよう
-          </p>
-          
-          <div className="flex flex-col items-center gap-3">
-            {/* Camera button */}
-            <div 
-              className="flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-              style={{ 
-                backgroundColor: '#F7F4F4'
-              }}
-              onClick={handleCameraClick}
-            >
-              <Image src="/images/photo_camera.svg" alt="Camera" width={96} height={96} />
-            </div>
+    <AuthGuard>
+      <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
+        {/* Main content container - including logo */}
+        <div className="flex flex-col items-center gap-14 px-8 py-8 w-full max-w-sm">
+          {/* Logo image */}
+          <div className="flex justify-center">
+            <Image
+              src="/images/meguru_logo.png"
+              alt="Meguru Logo"
+              width={256}
+              height={64}
+              className="object-contain"
+            />
+          </div>
+          {/* First section - Camera */}
+          <div className="flex flex-col items-center gap-3 w-44">
             <p 
               className="text-center leading-5"
               style={{ 
-                color: '#563124', 
-                fontFamily: 'Noto Sans JP', 
-                fontSize: '16px', 
-                fontWeight: '700', 
-                lineHeight: '21px' 
+                color: '#563124',
+                fontSize: '18px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                letterSpacing: '-0.14px'
               }}
             >
-              冷蔵庫の中身を撮影して<br />レシピを検索しよう
+              冷蔵庫撮影で
             </p>
             
-            <div className="flex flex-col items-center gap-3">
-              {/* Camera button */}
-              <div 
-                className="flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                style={{ 
-                  backgroundColor: '#F7F4F4'
-                }}
-                onClick={handleCameraClick}
-              >
-                <Image src="/images/photo_camera.svg" alt="Camera" width={96} height={96} />
-              </div>
-              <p 
-                className="text-center"
-                style={{ 
-                  color: '#563124', 
-                  fontFamily: 'Noto Sans JP', 
-                  fontSize: '16px', 
-                  fontWeight: '700', 
-                  lineHeight: '21px' 
-                }}
-              >
-                撮影
-              </p>
-            </div>
+            <button 
+              onClick={handleCameraClick}
+              className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md cursor-pointer"
+            >
+              <Image 
+                src="/images/photo_camera.svg"
+                alt="photo camera"
+                width={34}
+                height={27}
+                className="object-contain"
+              />
+            </button>
+
+            <p 
+              className="text-center leading-5"
+              style={{ 
+                color: '#563124',
+                fontSize: '18px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                letterSpacing: '-0.14px'
+              }}
+            >
+              簡単撮影
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center justify-center w-full">
+            <div className="h-px bg-gray-300 flex-grow"></div>
+            <span 
+              className="px-4"
+              style={{ 
+                color: '#563124',
+                fontSize: '16px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 400
+              }}
+            >
+              または
+            </span>
+            <div className="h-px bg-gray-300 flex-grow"></div>
           </div>
 
           {/* Second section - Recipe */}
-          <div className="flex flex-col items-center gap-3 w-48">
+          <div className="flex flex-col items-center gap-3 w-44">
             <p 
               className="text-center leading-5"
               style={{ 
-                color: '#563124', 
-                fontFamily: 'Noto Sans JP', 
-                fontSize: '16px', 
-                fontWeight: '700', 
-                lineHeight: '21px' 
+                color: '#563124',
+                fontSize: '18px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                letterSpacing: '-0.14px'
               }}
             >
-              前回のレシピを確認しよう
+              これまでの
             </p>
             
-            <div className="flex flex-col items-center gap-3">
-              {/* Recipe button */}
-              <div 
-                className="flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={handleRecipeClick}
-              >
-                <Image src="/images/photo_recipe.svg" alt="Recipe" width={96} height={96} />
-              </div>
-              <p 
-                className="text-center"
-                style={{ 
-                  color: '#563124', 
-                  fontFamily: 'Noto Sans JP', 
-                  fontSize: '16px', 
-                  fontWeight: '700', 
-                  lineHeight: '21px' 
-                }}
-              >
-                レシピ
-              </p>
-            </div>
+            <button 
+              onClick={handleRecipeClick}
+              className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md cursor-pointer"
+            >
+              <Image 
+                src="/images/photo_recipe.svg"
+                alt="photo recipe"
+                width={34}
+                height={27}
+                className="object-contain"
+              />
+            </button>
+
+            <p 
+              className="text-center leading-5"
+              style={{ 
+                color: '#563124',
+                fontSize: '18px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                letterSpacing: '-0.14px'
+              }}
+            >
+              レシピ
+            </p>
           </div>
         </div>
       </main>
