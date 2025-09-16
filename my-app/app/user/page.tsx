@@ -81,23 +81,45 @@ export default function UserHomePage() {
 
   // Home view - matching Figma design exactly
   return (
-    <AuthGuard>
-      <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
-        {/* Background image */}
-        <div className="absolute top-24 w-64 h-16">
+    <main className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F4F4' }}>
+      {/* Main content container - including logo */}
+      <div className="flex flex-col items-center gap-14 px-8 py-8 w-full max-w-sm">
+        {/* Logo image */}
+        <div className="flex justify-center">
           <Image
             src="/images/logo-image.png"
             alt="Background"
-            width={256} // w-64 は 256px
-            height={64} // h-16 は 64px
-            className="w-full h-full object-cover"
+            width={256}
+            height={64}
+            className="object-contain"
           />
         </div>
-
-        {/* Main content container */}
-        <div className="flex flex-col items-center gap-14 px-36 py-32 w-full max-w-sm">
-          {/* First section - Camera */}
-          <div className="flex flex-col items-center gap-3 w-44">
+        {/* First section - Camera */}
+        <div className="flex flex-col items-center gap-3 w-44">
+          <p 
+            className="text-center leading-5"
+            style={{ 
+              color: '#563124', 
+              fontFamily: 'Noto Sans JP', 
+              fontSize: '16px', 
+              fontWeight: '700', 
+              lineHeight: '21px' 
+            }}
+          >
+            冷蔵庫の中身を撮影して<br />レシピを検索しよう
+          </p>
+          
+          <div className="flex flex-col items-center gap-3">
+            {/* Camera button */}
+            <div 
+              className="flex items-center justify-center rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+              style={{ 
+                backgroundColor: '#F7F4F4'
+              }}
+              onClick={handleCameraClick}
+            >
+              <Image src="/images/photo_camera.svg" alt="Camera" width={96} height={96} />
+            </div>
             <p 
               className="text-center leading-5"
               style={{ 
