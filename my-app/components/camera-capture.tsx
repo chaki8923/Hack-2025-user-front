@@ -36,26 +36,91 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
+      // Check if getUserMedia is supported and HTTPS
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('カメラAPIがサポートされていません。HTTPSでアクセスしてください。')
+      }
+
+      // Start with back camera on mobile, front camera on desktop
+      let constraints: MediaStreamConstraints = {
         video: {
-          facingMode: isMobile ? 'environment' : 'user', // Use back camera on mobile
+          facingMode: isMobile ? 'environment' : 'user',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
-      })
+      }
+
+      let mediaStream: MediaStream | null = null
       
-      setStream(mediaStream)
-      setIsCameraActive(true)
-      setError(null)
+      try {
+        // Try first constraint
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+      } catch (backCameraError) {
+        console.warn('初回カメラ起動失敗:', backCameraError)
+        
+        // Fallback 1: Try front camera if back camera failed on mobile
+        if (isMobile) {
+          try {
+            constraints = {
+              video: {
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              }
+            }
+            mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+          } catch (frontCameraError) {
+            console.warn('フロントカメラ失敗:', frontCameraError)
+            
+            // Fallback 2: Basic video constraints
+            try {
+              constraints = { video: true }
+              mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+            } catch {
+              throw backCameraError // Throw original error
+            }
+          }
+        } else {
+          throw backCameraError
+        }
+      }
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
+      if (mediaStream) {
+        setStream(mediaStream)
+        setIsCameraActive(true)
+        setError(null)
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream
+          
+          // Ensure video plays
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(playError => {
+              console.warn('Video play failed:', playError)
+            })
+          }
+        }
       }
     } catch (err) {
-      console.error('Error accessing camera:', err)
-      setError('カメラにアクセスできませんでした。カメラの権限を確認してください。')
-      // Fallback to mock camera for demo purposes
-      setIsCameraActive(true)
+      console.error('カメラ起動エラー:', err)
+      
+      let errorMessage = 'カメラにアクセスできませんでした。'
+      
+      if (err instanceof Error) {
+        const error = err as Error & { name?: string }
+        if (err.message.includes('Permission denied') || error.name === 'NotAllowedError') {
+          errorMessage = 'カメラの使用が許可されていません。ブラウザの設定でカメラの権限を有効にしてください。'
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'カメラが見つかりません。デバイスにカメラが接続されているか確認してください。'
+        } else if (error.name === 'NotSupportedError' || err.message.includes('HTTPS')) {
+          errorMessage = 'カメラAPIがサポートされていません。HTTPSでアクセスしてください。'
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = 'カメラが他のアプリケーションで使用中です。他のアプリを閉じてから再試行してください。'
+        }
+      }
+      
+      setError(errorMessage)
+      setIsCameraActive(false) // 重要: エラー時はfalseにする
     }
   }
 
