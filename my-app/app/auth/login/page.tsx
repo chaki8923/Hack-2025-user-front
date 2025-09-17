@@ -41,14 +41,19 @@ const handleLogin = async () => {
     const data = result.data
     
     // JWTトークンをlocalStorageに保存
-    localStorage.setItem("token", data.data.token)
-    localStorage.setItem("user", JSON.stringify({
-      id: data.data.id,
-      email: data.data.email,
-      name: data.data.name,
-    }))
+    if (data?.data?.token) {
+      localStorage.setItem("token", data.data.token)
+      localStorage.setItem("user", JSON.stringify({
+        id: data.data.id,
+        email: data.data.email,
+        name: data.data.name,
+      }))
 
-    console.log("ログイン成功:", data)
+      console.log("ログイン成功:", data)
+    } else {
+      setError("ログインレスポンスが不正です")
+      return
+    }
     
     // ユーザーページにリダイレクト
     router.push("/user")

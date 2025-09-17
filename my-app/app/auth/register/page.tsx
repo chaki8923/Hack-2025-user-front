@@ -67,9 +67,12 @@ export default function RegisterPage() {
       }
 
       const data = result.data
-      console.log("ユーザー登録成功:", data)
-      
-      setStep(3)
+      if (data) {
+        console.log("ユーザー登録成功:", data)
+        setStep(3)
+      } else {
+        setError("登録レスポンスが不正です")
+      }
     } catch (error) {
       console.error("登録エラー:", error)
       setError("登録に失敗しました。しばらく時間をおいて再度お試しください")

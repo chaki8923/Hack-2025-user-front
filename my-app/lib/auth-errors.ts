@@ -2,6 +2,20 @@
  * 認証エラーのハンドリングユーティリティ
  */
 
+// 認証APIのレスポンス型定義
+interface AuthApiResponse {
+  data?: {
+    id?: string;
+    email?: string;
+    name?: string;
+    token?: string;
+    created_at?: string;
+    message?: string;
+  };
+  message?: string;
+  error?: string;
+}
+
 // バックエンドから返される可能性のあるエラーメッセージと日本語の対応
 const errorMessages: Record<string, string> = {
   // ログイン関連
@@ -147,7 +161,7 @@ export async function handleApiError(response: Response): Promise<string> {
 /**
  * 認証API呼び出し用のヘルパー関数
  */
-export async function callAuthApi(url: string, data: object): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function callAuthApi(url: string, data: object): Promise<{ success: boolean; data?: AuthApiResponse; error?: string }> {
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -162,7 +176,7 @@ export async function callAuthApi(url: string, data: object): Promise<{ success:
       return { success: false, error: errorMessage };
     }
 
-    const responseData = await response.json();
+    const responseData: AuthApiResponse = await response.json();
     return { success: true, data: responseData };
   } catch (error) {
     const errorMessage = translateErrorMessage(error);
