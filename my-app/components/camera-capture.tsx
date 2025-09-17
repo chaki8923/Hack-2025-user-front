@@ -20,12 +20,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
   const [isMobile, setIsMobile] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<string[]>([])
-  const [debugInfo, setDebugInfo] = useState<{
-    protocol: string;
-    userAgent: string;
-    mediaDevicesSupported: boolean;
-    constraints: object | null;
-  } | null>(null)
+  const [isCapturing, setIsCapturing] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -41,101 +36,26 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
 
   const startCamera = async () => {
     try {
-      // Collect debug information
-      const debug = {
-        protocol: window.location.protocol,
-        userAgent: navigator.userAgent,
-        mediaDevicesSupported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-        constraints: null as object | null
-      }
-      setDebugInfo(debug)
-      
-      // Check if getUserMedia is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('カメラAPIがサポートされていません。HTTPSでアクセスしてください。')
-      }
-
-      // First try with back camera on mobile
-      let constraints: MediaStreamConstraints = {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: isMobile ? 'environment' : 'user',
+          facingMode: isMobile ? 'environment' : 'user', // Use back camera on mobile
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
-      }
+      })
       
-      // Update debug info with constraints
-      debug.constraints = constraints
-      setDebugInfo({...debug})
-
-      let mediaStream: MediaStream | null = null
+      setStream(mediaStream)
+      setIsCameraActive(true)
+      setError(null)
       
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
-      } catch (backCameraError) {
-        console.warn('Back camera failed, trying front camera:', backCameraError)
-        
-        // Fallback to front camera if back camera fails
-        if (isMobile) {
-          constraints = {
-            video: {
-              facingMode: 'user',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            }
-          }
-          
-          try {
-            mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
-          } catch (frontCameraError) {
-            console.warn('Front camera failed, trying basic constraints:', frontCameraError)
-            
-            // Last fallback - basic video constraints
-            constraints = { video: true }
-            mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
-          }
-        } else {
-          throw backCameraError
-        }
-      }
-      
-      if (mediaStream) {
-        setStream(mediaStream)
-        setIsCameraActive(true)
-        setError(null)
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream
-          
-          // Ensure video starts playing
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().catch(playError => {
-              console.warn('Video play failed:', playError)
-            })
-          }
-        }
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream
       }
     } catch (err) {
       console.error('Error accessing camera:', err)
-      
-      let errorMessage = 'カメラにアクセスできませんでした。'
-      
-      if (err instanceof Error) {
-        if (err.message.includes('Permission denied') || err.name === 'NotAllowedError') {
-          errorMessage = 'カメラの使用が許可されていません。ブラウザの設定でカメラの権限を有効にしてください。'
-        } else if (err.name === 'NotFoundError') {
-          errorMessage = 'カメラが見つかりません。デバイスにカメラが接続されているか確認してください。'
-        } else if (err.name === 'NotSupportedError' || err.message.includes('HTTPS')) {
-          errorMessage = 'カメラAPIがサポートされていません。HTTPSでアクセスしてください。'
-        } else if (err.name === 'NotReadableError') {
-          errorMessage = 'カメラが他のアプリケーションで使用中です。他のアプリを閉じてから再試行してください。'
-        } else if (err.name === 'OverconstrainedError') {
-          errorMessage = '要求されたカメラ設定がサポートされていません。'
-        }
-      }
-      
-      setError(errorMessage)
-      setIsCameraActive(false)
+      setError('カメラにアクセスできませんでした。カメラの権限を確認してください。')
+      // Fallback to mock camera for demo purposes
+      setIsCameraActive(true)
     }
   }
 
@@ -147,26 +67,40 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
     setIsCameraActive(false)
   }
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      const context = canvas.getContext('2d')
-
-      if (context) {
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-
-        // Draw the current video frame to canvas
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-        // Convert to data URL
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8)
-        setCapturedImage(imageDataUrl)
+  const captureImage = async () => {
+    setIsCapturing(true)
+    
+    try {
+      // If camera is not active, try to start it first
+      if (!isCameraActive || !stream) {
+        console.log('カメラが非アクティブです。カメラを起動します...')
+        await startCamera()
+        // Wait a moment for camera to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
-    } else {
+
+      if (videoRef.current && canvasRef.current && isCameraActive) {
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        const context = canvas.getContext('2d')
+
+        if (context && video.videoWidth > 0 && video.videoHeight > 0) {
+          // Set canvas dimensions to match video
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
+
+          // Draw the current video frame to canvas
+          context.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+          // Convert to data URL
+          const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8)
+          setCapturedImage(imageDataUrl)
+          return
+        }
+      }
+      
       // Fallback: create a mock refrigerator image
+      console.log('カメラからの撮影に失敗しました。モック画像を作成します。')
       const canvas = document.createElement('canvas')
       canvas.width = 400
       canvas.height = 300
@@ -187,6 +121,11 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       
       const imageDataUrl = canvas.toDataURL('image/jpeg')
       setCapturedImage(imageDataUrl)
+    } catch (error) {
+      console.error('撮影エラー:', error)
+      setError('撮影に失敗しました。再度お試しください。')
+    } finally {
+      setIsCapturing(false)
     }
   }
 
@@ -206,6 +145,7 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
     setCapturedImage(null)
     setAnalysisResult([])
     setIsAnalyzing(false)
+    setIsCapturing(false)
     // Restart camera when retaking
     startCamera()
   }
@@ -454,101 +394,21 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
   }
 
   if (error) {
-    const isHttpsRequired = error.includes('HTTPS')
-    const isPermissionDenied = error.includes('許可されていません')
-    const isNotFound = error.includes('見つかりません')
-    
     return (
-      <div className="min-h-screen p-8 flex flex-col justify-center">
-        <div className="text-center max-w-md mx-auto">
-          <div className="text-red-500 mb-6">
-            <Camera className="w-20 h-20 mx-auto mb-4" />
-            <p className="text-xl font-semibold">カメラエラー</p>
-          </div>
-          
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 font-medium mb-2">{error}</p>
-            
-            {isHttpsRequired && (
-              <div className="mt-4 text-sm text-red-700">
-                <p className="font-semibold mb-2">🔒 HTTPS接続が必要です</p>
-                <p>現在のURL: {window.location.protocol}{'//'}...</p>
-                <p>必要なURL: https:{'//'}...</p>
-              </div>
-            )}
-            
-            {isPermissionDenied && (
-              <div className="mt-4 text-sm text-red-700">
-                <p className="font-semibold mb-2">📱 カメラ権限を有効にする方法</p>
-                <ul className="text-left list-disc list-inside space-y-1">
-                  <li>ブラウザのアドレスバーのカメラアイコンをクリック</li>
-                  <li>「許可」または「Allow」を選択</li>
-                  <li>ページを更新してください</li>
-                </ul>
-              </div>
-            )}
-            
-            {isNotFound && (
-              <div className="mt-4 text-sm text-red-700">
-                <p className="font-semibold mb-2">📷 カメラ接続を確認</p>
-                <ul className="text-left list-disc list-inside space-y-1">
-                  <li>外付けカメラが接続されているか確認</li>
-                  <li>他のアプリでカメラを使用していないか確認</li>
-                  <li>デバイスを再起動してみてください</li>
-                </ul>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex flex-col gap-3">
-            <Button onClick={startCamera} className="w-full">
-              🔄 カメラを再試行
-            </Button>
-            
-            <Button 
-              onClick={() => fileInputRef.current?.click()} 
-              variant="outline" 
-              className="w-full"
-            >
-              📁 ギャラリーから選択
-            </Button>
-            
-            <Button onClick={handleBack} variant="outline" className="w-full">
-              ← 戻る
-            </Button>
-          </div>
-          
-          <div className="mt-6 text-xs text-gray-500">
-            <p>💡 ヒント: 写真をアップロードする場合は「ギャラリーから選択」をお使いください</p>
-          </div>
-          
-          {/* Debug information - only show in development or when needed */}
-          {debugInfo && (process.env.NODE_ENV === 'development' || isHttpsRequired) && (
-            <details className="mt-6 text-left">
-              <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 mb-2">
-                🔧 技術情報 (クリックして展開)
-              </summary>
-              <div className="bg-gray-100 rounded p-3 text-xs space-y-1">
-                <div><strong>Protocol:</strong> {debugInfo.protocol}</div>
-                <div><strong>MediaDevices Support:</strong> {debugInfo.mediaDevicesSupported ? '✅' : '❌'}</div>
-                <div><strong>Mobile Device:</strong> {isMobile ? '✅' : '❌'}</div>
-                <div><strong>User Agent:</strong> {debugInfo.userAgent.substring(0, 80)}...</div>
-                {debugInfo.constraints && (
-                  <div><strong>Camera Constraints:</strong> {JSON.stringify(debugInfo.constraints, null, 2)}</div>
-                )}
-              </div>
-            </details>
-          )}
+      <div className="text-center p-8">
+        <div className="text-red-500 mb-4">
+          <Camera className="w-16 h-16 mx-auto mb-4" />
+          <p className="text-lg font-semibold">カメラエラー</p>
         </div>
-        
-        {/* Hidden file input for gallery selection */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+        <p className="text-gray-600 mb-6">{error}</p>
+        <div className="space-x-4">
+          <Button onClick={handleBack} variant="outline">
+            戻る
+          </Button>
+          <Button onClick={startCamera}>
+            再試行
+          </Button>
+        </div>
       </div>
     )
   }
@@ -646,45 +506,18 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full relative bg-gray-900">
-            {/* Enhanced loading state with better UX */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white px-6">
-                <div className="relative mb-6">
-                  <Camera className="w-20 h-20 mx-auto text-white animate-pulse" />
-                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-2">カメラを起動中...</h3>
-                <p className="text-gray-300 mb-4">カメラの準備ができるまで少々お待ちください</p>
-                
+          <div className="w-full h-full relative">
+            {/* Overlay for camera loading state */}
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="text-center text-white">
+                <Camera className="w-16 h-16 mx-auto mb-4 animate-pulse" />
+                <p>カメラを起動中...</p>
                 {isMobile && (
-                  <div className="bg-blue-900 bg-opacity-50 rounded-lg p-3 mb-4">
-                    <div className="flex items-center justify-center gap-2 text-blue-200 mb-2">
-                      <Smartphone className="w-5 h-5" />
-                      <span className="font-medium">モバイルデバイス</span>
-                    </div>
-                    <p className="text-sm text-blue-100">背面カメラを使用します</p>
+                  <div className="mt-2 text-sm text-gray-300 flex items-center justify-center gap-2">
+                    <Smartphone className="w-4 h-4" />
+                    モバイルカメラを使用
                   </div>
                 )}
-                
-                <div className="space-y-2 text-sm text-gray-400">
-                  <p>• カメラの権限を許可してください</p>
-                  <p>• HTTPSが必要です</p>
-                  <p>• カメラが他で使用中でないか確認してください</p>
-                </div>
-                
-                <div className="mt-6">
-                  <Button 
-                    onClick={() => fileInputRef.current?.click()} 
-                    variant="outline" 
-                    className="bg-white bg-opacity-20 border-white border-opacity-30 text-white hover:bg-opacity-30"
-                  >
-                    📁 代わりに画像をアップロード
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
@@ -726,11 +559,15 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
           {/* Camera capture button */}
           <button
             onClick={captureImage}
-            disabled={!isCameraActive}
+            disabled={isCapturing}
             className="w-16 h-16 rounded-full flex items-center justify-center disabled:opacity-50"
             style={{ backgroundColor: '#563124' }}
           >
-            <Camera className="w-10 h-10 text-white" />
+            {isCapturing ? (
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            ) : (
+              <Camera className="w-10 h-10 text-white" />
+            )}
           </button>
         </div>
       </div>
