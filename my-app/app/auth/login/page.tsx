@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { callAuthApi } from "@/lib/auth-errors"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -23,26 +24,21 @@ const handleLogin = async () => {
     setError("")
     
     // 開発用
-    // const baseUrl = "http://localhost:8080";
+    const baseUrl = "http://localhost:8080";
     // 本番用
-    const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-    const response = await fetch(`${baseUrl}/api/v1/users/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-      }),
+    // const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+    
+    const result = await callAuthApi(`${baseUrl}/api/v1/users/login`, {
+      email: email,
+      password: password,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || "ログインに失敗しました")
+    if (!result.success) {
+      setError(result.error || "ログインに失敗しました")
+      return
     }
 
-    const data = await response.json()
+    const data = result.data
     
     // JWTトークンをlocalStorageに保存
     localStorage.setItem("token", data.data.token)
@@ -58,7 +54,7 @@ const handleLogin = async () => {
     router.push("/user")
   } catch (error) {
     console.error("ログインエラー:", error)
-    setError(error instanceof Error ? error.message : "ログインに失敗しました")
+    setError("ログインに失敗しました。しばらく時間をおいて再度お試しください")
   }
 }
 

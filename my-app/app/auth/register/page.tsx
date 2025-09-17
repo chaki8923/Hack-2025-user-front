@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Image from "next/image";
+import Image from "next/image"
+import { callAuthApi } from "@/lib/auth-errors"
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1)
@@ -53,30 +54,25 @@ export default function RegisterPage() {
       // const baseUrl = "http://localhost:8080";
       // 本番用 
       const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-      const response = await fetch(`${baseUrl}/api/v1/users/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          name: name,
-        }),
+      
+      const result = await callAuthApi(`${baseUrl}/api/v1/users/register`, {
+        email: email,
+        password: password,
+        name: name,
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "登録に失敗しました")
+      if (!result.success) {
+        setError(result.error || "登録に失敗しました")
+        return
       }
 
-      const data = await response.json()
+      const data = result.data
       console.log("ユーザー登録成功:", data)
       
       setStep(3)
     } catch (error) {
       console.error("登録エラー:", error)
-      setError(error instanceof Error ? error.message : "登録に失敗しました")
+      setError("登録に失敗しました。しばらく時間をおいて再度お試しください")
     }
   }
 

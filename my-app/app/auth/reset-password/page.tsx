@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react"
-import Image from "next/image";
+import Image from "next/image"
+import { callAuthApi } from "@/lib/auth-errors"
 
 function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState("")
@@ -56,20 +57,15 @@ function ResetPasswordForm() {
       // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
       // 本番用
       const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-      const response = await fetch(`${baseUrl}/api/v1/users/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: token,
-          new_password: newPassword,
-        }),
+      
+      const result = await callAuthApi(`${baseUrl}/api/v1/users/reset-password`, {
+        token: token,
+        new_password: newPassword,
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "パスワードリセットに失敗しました")
+      if (!result.success) {
+        setError(result.error || "パスワードリセットに失敗しました")
+        return
       }
 
       setIsSuccess(true)
@@ -80,7 +76,7 @@ function ResetPasswordForm() {
       }, 3000)
     } catch (error) {
       console.error("パスワードリセットエラー:", error)
-      setError(error instanceof Error ? error.message : "パスワードリセットに失敗しました")
+      setError("パスワードリセットに失敗しました。しばらく時間をおいて再度お試しください")
     } finally {
       setIsLoading(false)
     }

@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CheckCircle } from "lucide-react"
-import Image from "next/image";
+import Image from "next/image"
+import { callAuthApi } from "@/lib/auth-errors"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -33,25 +34,20 @@ export default function ForgotPasswordPage() {
       // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
       // 本番用
       const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-      const response = await fetch(`${baseUrl}/api/v1/users/forgot-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-        }),
+      
+      const result = await callAuthApi(`${baseUrl}/api/v1/users/forgot-password`, {
+        email: email,
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "パスワードリセット申請に失敗しました")
+      if (!result.success) {
+        setError(result.error || "パスワードリセット申請に失敗しました")
+        return
       }
 
       setIsSubmitted(true)
     } catch (error) {
       console.error("パスワードリセット申請エラー:", error)
-      setError(error instanceof Error ? error.message : "パスワードリセット申請に失敗しました")
+      setError("パスワードリセット申請に失敗しました。しばらく時間をおいて再度お試しください")
     } finally {
       setIsLoading(false)
     }
