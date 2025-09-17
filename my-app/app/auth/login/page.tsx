@@ -24,9 +24,9 @@ const handleLogin = async () => {
     setError("")
     
     // 開発用
-    const baseUrl = "http://localhost:8080";
+    // const baseUrl = "http://localhost:8080";
     // 本番用
-    // const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
+    const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
     
     const result = await callAuthApi(`${baseUrl}/api/v1/users/login`, {
       email: email,
