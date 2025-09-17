@@ -9,9 +9,10 @@ import Image from "next/image"
 interface CameraCaptureProps {
   onImageCapture: (imageDataUrl: string, ingredients: string[]) => void
   onBack: () => void
+  forceRestart?: boolean
 }
 
-export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureProps) {
+export default function CameraCapture({ onImageCapture, onBack, forceRestart = false }: CameraCaptureProps) {
   const { token } = useAuth()
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
@@ -28,23 +29,46 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
   useEffect(() => {
     // Check if device is mobile
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+    
+    // Start camera immediately
+    console.log('useEffect: カメラ起動開始')
     startCamera()
+    
     return () => {
       stopCamera()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Force restart when forceRestart prop changes
+  useEffect(() => {
+    if (forceRestart) {
+      console.log('forceRestart: カメラ強制再起動')
+      stopCamera()
+      setTimeout(() => {
+        startCamera()
+      }, 100)
+    }
+  }, [forceRestart]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const startCamera = async () => {
+    console.log('🎥 startCamera: 開始')
     try {
       // Check if getUserMedia is supported and HTTPS
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.log('❌ getUserMedia not supported')
         throw new Error('カメラAPIがサポートされていません。HTTPSでアクセスしてください。')
       }
+
+      // Calculate mobile status directly in this function to ensure accuracy
+      const isCurrentlyMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      console.log('📱 カメラ起動時のモバイル判定:', isCurrentlyMobile)
+      console.log('📹 既存のstream状態:', stream ? 'あり' : 'なし')
+      console.log('🎬 既存のisCameraActive:', isCameraActive)
 
       // Start with back camera on mobile, front camera on desktop
       let constraints: MediaStreamConstraints = {
         video: {
-          facingMode: isMobile ? 'environment' : 'user',
+          facingMode: isCurrentlyMobile ? 'environment' : 'user',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -54,12 +78,14 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       
       try {
         // Try first constraint
+        console.log('🔍 制約でカメラアクセス試行:', constraints)
         mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+        console.log('✅ 初回カメラアクセス成功')
       } catch (backCameraError) {
-        console.warn('初回カメラ起動失敗:', backCameraError)
+        console.warn('❌ 初回カメラ起動失敗:', backCameraError)
         
         // Fallback 1: Try front camera if back camera failed on mobile
-        if (isMobile) {
+        if (isCurrentlyMobile) {
           try {
             constraints = {
               video: {
@@ -86,20 +112,28 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       }
       
       if (mediaStream) {
+        console.log('🎬 メディアストリーム取得成功、設定開始')
         setStream(mediaStream)
         setIsCameraActive(true)
         setError(null)
         
         if (videoRef.current) {
+          console.log('📺 ビデオ要素に設定')
           videoRef.current.srcObject = mediaStream
           
           // Ensure video plays
           videoRef.current.onloadedmetadata = () => {
+            console.log('✅ ビデオメタデータ読み込み完了、再生開始')
             videoRef.current?.play().catch(playError => {
-              console.warn('Video play failed:', playError)
+              console.warn('❌ ビデオ再生失敗:', playError)
             })
           }
+        } else {
+          console.warn('⚠️ videoRef.currentがnull')
         }
+        console.log('🎉 カメラ起動完了')
+      } else {
+        console.warn('⚠️ mediaStreamがnull')
       }
     } catch (err) {
       console.error('カメラ起動エラー:', err)

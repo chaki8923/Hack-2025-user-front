@@ -11,9 +11,16 @@ export default function UserHomePage() {
   const [currentView, setCurrentView] = useState<'home' | 'camera' | 'loading'>('home')
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [detectedIngredients, setDetectedIngredients] = useState<string[]>([])
+  const [cameraKey, setCameraKey] = useState(0)
   const router = useRouter()
 
   const handleCameraClick = () => {
+    console.log('handleCameraClick: カメラ画面遷移開始')
+    // Reset any previous state before switching to camera
+    setCapturedImage(null)
+    setDetectedIngredients([])
+    // Force camera remount by updating key
+    setCameraKey(prev => prev + 1)
     setCurrentView('camera')
   }
 
@@ -58,6 +65,8 @@ export default function UserHomePage() {
 
         {/* Camera interface */}
         <CameraCapture 
+          key={`camera-${cameraKey}`} // Force remount on each camera access
+          forceRestart={true}
           onImageCapture={handleImageCapture}
           onBack={handleBackToHome}
         />
