@@ -141,29 +141,71 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
         console.log("🖼️ Image data length:", capturedImage?.length || 0)
         
         const baseUrl = "https://3qtmceciqv.ap-northeast-1.awsapprunner.com";
-        // Extract base64 data from data URL
-        const base64Data = capturedImage.split(',')[1] // Remove "data:image/jpeg;base64," prefix
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        // Add Authorization header if token is available
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Data URLからBase64部分のみを抽出
+        const base64Data = capturedImage.replace(/^data:image\/[a-z]+;base64,/, '');
         
         const response = await fetch(`${baseUrl}/api/v1/recipes-from-image`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers,
           body: JSON.stringify({ 
-            ImageBase64: base64Data,
+            image_base64: base64Data  // バックエンドが期待するフィールド名
           })
         })
         
         console.log("📡 Response received:", response.status, response.statusText)
         console.log("📋 Response headers:", Object.fromEntries(response.headers.entries()))
 
-        const data = await response.json()
+        // レスポンスステータスをチェック
+        if (!response.ok) {
+          console.error("❌ API Error:", response.status, response.statusText)
+          
+          if (response.status === 401) {
+            console.error("🔑 Unauthorized: Token may be missing or invalid")
+            throw new Error(`API Error: 401 Unauthorized - Please login to access AI recipe analysis`)
+          }
+          
+          // その他のエラーの場合もフォールバックレシピを使用
+          throw new Error(`API Error: ${response.status} ${response.statusText}`)
+        }
+
+        let data;
+        try {
+          data = await response.json()
+        } catch (jsonError) {
+          console.error("❌ Error parsing response JSON:", jsonError)
+          throw new Error("Invalid JSON response from API")
+        }
         
         console.log("🤖 AI Analysis Result:", data)
         
+        // データ構造の安全チェック
+        if (!data || !data.data) {
+          console.error("❌ Invalid response structure:", data)
+          throw new Error("Invalid response structure from API")
+        }
+        
+        console.log("🤖 AI Analysis Result2:", data.data.ai_recommended_recipes)
+        
         const ingredients = data.ingredients || []
-        const recipes = data.recipes || {}
+        const recipes = data.data || {}
+        
+        console.log("🥕 Extracted ingredients:", ingredients)
+        console.log("📖 Recipe data structure:", recipes)
+        console.log("🔢 Recipe counts:", {
+          low_calorie: recipes.low_calorie_recipes?.length || 0,
+          low_price: recipes.low_price_recipes?.length || 0,
+          quick_cook: recipes.quick_cook_recipes?.length || 0,
+          ai_recommended: recipes.ai_recommended_recipes?.length || 0
+        })
         
         setAnalysisResult(ingredients)
         
@@ -176,14 +218,93 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
           console.log("⚠️ Analysis completed with errors:", data.error)
         }
         
-        // Store ingredients and recipes in localStorage
+        // Store ingredients and recipes in localStorage with detailed logging
         localStorage.setItem('detectedIngredients', JSON.stringify(ingredients))
         localStorage.setItem('extracted_ingredients', JSON.stringify(ingredients))
-        localStorage.setItem('low_calorie_recipes', JSON.stringify(recipes.low_calorie_recipes || []))
-        localStorage.setItem('low_price_recipes', JSON.stringify(recipes.low_price_recipes || []))
-        localStorage.setItem('quick_cook_recipes', JSON.stringify(recipes.quick_cook_recipes || []))
-        localStorage.setItem('ai_recommended_recipes', JSON.stringify(recipes.ai_recommended_recipes || []))
+        
+        // レシピデータを正規化（Recipe型に合わせる）
+        const normalizeRecipes = (recipeArray: unknown[]): Record<string, unknown>[] => {
+          if (!Array.isArray(recipeArray)) return []
+          
+          return recipeArray.map((recipe: unknown) => {
+            const r = recipe as Record<string, unknown>
+            return {
+            recipe_id: r.recipe_id || r.id || `recipe_${Date.now()}_${Math.random()}`,
+            name: r.name || "名前不明",
+            cook_time: r.cook_time || r.cooking_time || 30,
+            calories: r.calories || 300,
+            total_price: r.total_price || r.price || 400,
+            image_url: r.image_url || "/images/curry.jpg",
+            ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
+            seasonings: Array.isArray(r.seasonings) ? r.seasonings : ["塩", "こしょう"],
+            saved_flg: r.saved_flg || false,
+            created_at: r.created_at || new Date().toISOString()
+          }
+        })
+        }
+
+        const lowCalorieRecipes = normalizeRecipes(recipes.low_calorie_recipes || [])
+        const lowPriceRecipes = normalizeRecipes(recipes.low_price_recipes || [])
+        const quickCookRecipes = normalizeRecipes(recipes.quick_cook_recipes || [])
+        const aiRecommendedRecipes = normalizeRecipes(recipes.ai_recommended_recipes || [])
+
+        console.log("💾 Low Calorie Recipes:", lowCalorieRecipes)
+        console.log("💾 Low Price Recipes:", lowPriceRecipes)
+        console.log("💾 Quick Cook Recipes:", quickCookRecipes)
+        console.log("💾 AI Recommended Recipes:", aiRecommendedRecipes)
+        
+        localStorage.setItem('low_calorie_recipes', JSON.stringify(lowCalorieRecipes))
+        localStorage.setItem('low_price_recipes', JSON.stringify(lowPriceRecipes))
+        localStorage.setItem('quick_cook_recipes', JSON.stringify(quickCookRecipes))
+        localStorage.setItem('ai_recommended_recipes', JSON.stringify(aiRecommendedRecipes))
+        
+        console.log("💾 Saved to localStorage:", {
+          'low_calorie_recipes': lowCalorieRecipes.length + ' recipes',
+          'low_price_recipes': lowPriceRecipes.length + ' recipes',
+          'quick_cook_recipes': quickCookRecipes.length + ' recipes',
+          'ai_recommended_recipes': aiRecommendedRecipes.length + ' recipes'
+        })
         localStorage.setItem('aiAnalysisResult', JSON.stringify(data))
+        
+        // If no recipes are available, provide fallback recipes
+        const totalRecipeCount = lowCalorieRecipes.length + lowPriceRecipes.length + quickCookRecipes.length + aiRecommendedRecipes.length;
+        if (totalRecipeCount === 0) {
+          console.log("⚠️ No recipes found in AI response, using fallback recipes");
+          const fallbackRecipes = [
+            {
+              recipe_id: "fallback_1",
+              name: "野菜炒め",
+              cook_time: 15,
+              calories: 200,
+              total_price: 300,
+              image_url: "/images/vegetable-curry.jpg",
+              ingredients: ["にんじん", "玉ねぎ", "キャベツ", "もやし"],
+              seasonings: ["醤油", "塩", "こしょう", "サラダ油"],
+              saved_flg: false,
+              created_at: new Date().toISOString()
+            },
+            {
+              recipe_id: "fallback_2", 
+              name: "チキンカレー",
+              cook_time: 30,
+              calories: 450,
+              total_price: 500,
+              image_url: "/images/curry.jpg",
+              ingredients: ["鶏肉", "玉ねぎ", "にんじん", "じゃがいも"],
+              seasonings: ["カレー粉", "塩", "こしょう", "トマト缶"],
+              saved_flg: false,
+              created_at: new Date().toISOString()
+            }
+          ];
+          
+          // Store fallback recipes in all categories
+          localStorage.setItem('low_calorie_recipes', JSON.stringify(fallbackRecipes))
+          localStorage.setItem('low_price_recipes', JSON.stringify(fallbackRecipes))
+          localStorage.setItem('quick_cook_recipes', JSON.stringify(fallbackRecipes))
+          localStorage.setItem('ai_recommended_recipes', JSON.stringify(fallbackRecipes))
+          
+          console.log("💾 Fallback recipes saved to all categories");
+        }
         
         // Call the parent callback with image and ingredients
         onImageCapture(capturedImage, ingredients)
@@ -191,11 +312,56 @@ export default function CameraCapture({ onImageCapture, onBack }: CameraCaptureP
       } catch (error) {
         console.error("❌ AI Analysis Error:", error)
         
-        // Fallback with mock ingredients
+        // 詳細なエラーログ
+        if (error instanceof Error) {
+          console.error("🔍 Error details:", error.message)
+          
+          // 401エラーの場合の特別な処理
+          if (error.message.includes("401")) {
+            console.error("🔑 Unauthorized Error: Please login to access AI recipe analysis")
+          }
+        }
+        
+        // Fallback with mock ingredients and recipes
         const fallbackIngredients = ["にんじん", "玉ねぎ", "キャベツ", "豚肉", "じゃがいも"]
+        const fallbackRecipes = [
+          {
+            recipe_id: "error_fallback_1",
+            name: "豚肉と野菜の炒め物",
+            cook_time: 20,
+            calories: 350,
+            total_price: 400,
+            image_url: "/images/ginger_pork.jpg",
+            ingredients: ["豚肉", "にんじん", "玉ねぎ", "キャベツ"],
+            seasonings: ["醤油", "みりん", "生姜", "サラダ油"],
+            saved_flg: false,
+            created_at: new Date().toISOString()
+          },
+          {
+            recipe_id: "error_fallback_2",
+            name: "野菜スープ",
+            cook_time: 25,
+            calories: 150,
+            total_price: 250,
+            image_url: "/images/vegetable-curry.jpg",
+            ingredients: ["にんじん", "玉ねぎ", "じゃがいも", "キャベツ"],
+            seasonings: ["塩", "こしょう", "コンソメ"],
+            saved_flg: false,
+            created_at: new Date().toISOString()
+          }
+        ];
+        
         setAnalysisResult(fallbackIngredients)
         localStorage.setItem('detectedIngredients', JSON.stringify(fallbackIngredients))
         localStorage.setItem('extracted_ingredients', JSON.stringify(fallbackIngredients))
+        
+        // Store fallback recipes in all categories
+        localStorage.setItem('low_calorie_recipes', JSON.stringify(fallbackRecipes))
+        localStorage.setItem('low_price_recipes', JSON.stringify(fallbackRecipes))
+        localStorage.setItem('quick_cook_recipes', JSON.stringify(fallbackRecipes))
+        localStorage.setItem('ai_recommended_recipes', JSON.stringify(fallbackRecipes))
+        
+        console.log("💾 Error fallback recipes saved to all categories");
         onImageCapture(capturedImage, fallbackIngredients)
       }
     }
